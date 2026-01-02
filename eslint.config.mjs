@@ -1,5 +1,4 @@
 import js from '@eslint/js';
-import mui from '@mui/eslint-plugin';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -19,12 +18,10 @@ export default tseslint.config(
     },
     plugins: {
       'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-      '@mui': mui
+      'react-refresh': reactRefresh
     },
     rules: {
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      '@mui/consistent-callback-names': 'off'
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
     }
   },
   {
