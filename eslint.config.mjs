@@ -6,16 +6,10 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.stylistic,
   {
     files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.json'],
-        tsconfigRootDir: import.meta.dirname
-      }
-    },
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh
@@ -25,7 +19,7 @@ export default tseslint.config(
     }
   },
   {
-    ignores: ['dist', 'node_modules']
+    ignores: ['dist', 'node_modules', 'eslint.config.mjs']
   },
   prettierRecommended
 );

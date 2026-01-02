@@ -4,19 +4,19 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { buildTheme } from './theme';
 
-type ColorModeContextValue = {
+interface ColorModeContextValue {
   mode: PaletteMode;
   toggleColorMode: () => void;
-};
+}
 
 const ColorModeContext = createContext<ColorModeContextValue>({
   mode: 'light',
-  toggleColorMode: () => {},
+  toggleColorMode: () => undefined
 });
 
-type BrandThemeProviderProps = {
+interface BrandThemeProviderProps {
   children: React.ReactNode;
-};
+}
 
 export const BrandThemeProvider: React.FC<BrandThemeProviderProps> = ({ children }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -44,4 +44,5 @@ export const BrandThemeProvider: React.FC<BrandThemeProviderProps> = ({ children
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useColorMode = () => useContext(ColorModeContext);

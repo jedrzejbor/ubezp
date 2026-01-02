@@ -13,7 +13,7 @@ import {
   IconButton,
   Stack,
   Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
 
 import { useColorMode } from './theme';
@@ -37,7 +37,7 @@ function App() {
                   display: 'grid',
                   placeItems: 'center',
                   color: '#fff',
-                  boxShadow: 4,
+                  boxShadow: 4
                 }}
               >
                 <ColorLensRoundedIcon />
