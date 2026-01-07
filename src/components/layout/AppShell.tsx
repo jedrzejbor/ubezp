@@ -20,8 +20,8 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import BrandLogo from '@/components/BrandLogo';
 import { useColorMode } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
@@ -30,23 +30,24 @@ const drawerWidth = 260;
 
 interface AppShellProps {
   children: React.ReactNode;
+  navItems: { label: string; icon: React.ReactNode; to: string }[];
+  onLogout?: () => void;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ children }) => {
+export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout }) => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const location = useLocation();
   const [open, setOpen] = React.useState(false);
   const { toggleColorMode, mode } = useColorMode();
   const { user, resetAuth } = useAuthStore();
 
   const toggleDrawer = () => setOpen((prev) => !prev);
 
-  const navItems = [
-    {
-      label: 'Panel główny',
-      icon: <DashboardRoundedIcon fontSize="small" />
-    }
-  ];
+  const handleLogout = () => {
+    resetAuth();
+    onLogout?.();
+  };
 
   const drawerContent = (
     <Stack height="100%">
@@ -63,12 +64,29 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       </Stack>
       <Divider />
       <List sx={{ px: 1 }}>
-        {navItems.map((item) => (
-          <ListItemButton key={item.label} selected sx={{ borderRadius: 2 }}>
-            <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
-          </ListItemButton>
-        ))}
+        {navItems.map((item) => {
+          const active = location.pathname.startsWith(item.to);
+          return (
+            <ListItemButton
+              key={item.label}
+              component={NavLink}
+              to={item.to}
+              selected={active}
+              onClick={() => {
+                if (!isMdUp) {
+                  setOpen(false);
+                }
+              }}
+              sx={{
+                borderRadius: 2,
+                '&.active': { bgcolor: 'action.selected' }
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          );
+        })}
       </List>
       <Box flex={1} />
       <Divider />
@@ -116,7 +134,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             </IconButton>
           </Tooltip>
           <Tooltip title="Wyloguj">
-            <IconButton color="primary" onClick={resetAuth}>
+            <IconButton color="primary" onClick={handleLogout}>
               <LogoutRoundedIcon />
             </IconButton>
           </Tooltip>

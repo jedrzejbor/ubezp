@@ -1,4 +1,4 @@
-import { Box, Container, IconButton, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Container, IconButton, Paper, Stack, useTheme } from '@mui/material';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import BrandLogo from '@/components/BrandLogo';
@@ -54,8 +54,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             variant="outlined"
             sx={{
               width: '100%',
-              p: { xs: 3, md: 4 },
-              borderRadius: 18,
+              p: '40px 16px 32px',
               boxShadow: isLight
                 ? '0px 14px 46px rgba(23, 26, 31, 0.06)'
                 : '0px 14px 46px rgba(0, 0, 0, 0.48)'
@@ -65,7 +64,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           </Paper>
         </Stack>
 
-        <Stack direction="row" spacing={1.5} justifyContent="center" mt={4} color="text.secondary">
+        {/* <Stack direction="row" spacing={1.5} justifyContent="center" mt={4} color="text.secondary">
           <Typography variant="body2" component="span">
             Regulaminy
           </Typography>
@@ -85,7 +84,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           sx={{ letterSpacing: '0.02em' }}
         >
           Copyright © 2024 Cliffsidebrokers
-        </Typography>
+        </Typography> */}
       </Container>
     </Box>
   );

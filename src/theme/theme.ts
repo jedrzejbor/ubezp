@@ -2,13 +2,14 @@ import { PaletteMode, ThemeOptions, createTheme } from '@mui/material/styles';
 
 const brandPalette = {
   primary: {
-    main: '#111218',
+    main: '#1E1F21',
     light: '#1D1F27',
     dark: '#0A0B0F',
     contrastText: '#F7F5F2'
   },
   secondary: {
-    main: '#A77D67',
+    // main: '#A77D67'
+    main: '#8F6D5F',
     light: '#C39E8E',
     dark: '#8B6452',
     contrastText: '#0F1117'
@@ -99,13 +100,14 @@ const commonComponents: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         '& .MuiOutlinedInput-root': {
-          borderRadius: shape.borderRadius - 2,
+          // borderRadius: shape.borderRadius - 2,
+          borderRadius: 3,
           backgroundColor: 'var(--mui-palette-background-paper)',
           '& fieldset': {
-            borderColor: 'var(--mui-palette-divider)'
+            borderColor: '#D0D5DD'
           },
           '&:hover fieldset': {
-            borderColor: 'var(--mui-palette-secondary-main)'
+            borderColor: '#D0D5DD'
           },
           '&.Mui-focused fieldset': {
             borderWidth: 1.5
@@ -143,11 +145,11 @@ export const buildTheme = (mode: PaletteMode) =>
       background:
         mode === 'light'
           ? { default: '#F5F3EF', paper: '#FFFFFF' }
-          : { default: '#0E1117', paper: '#131823' },
+          : { default: '#1E1F21', paper: '#FFFFFF' },
       text:
         mode === 'light'
           ? { primary: '#1A1C22', secondary: '#4C5563' }
-          : { primary: '#E7E9EE', secondary: '#A8B0C2' },
+          : { primary: '#1E1F21', secondary: '#32343A' },
       divider: mode === 'light' ? '#E5E0DA' : '#252C38'
     },
     typography,
