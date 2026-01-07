@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
 const emailField = z
-  .string({ required_error: 'Adres e-mail jest wymagany' })
+  .string()
+  .min(1, 'Adres e-mail jest wymagany')
   .email('Podaj prawidłowy adres e-mail');
 
-const passwordField = z
-  .string({ required_error: 'Hasło jest wymagane' })
-  .min(8, 'Hasło musi mieć co najmniej 8 znaków');
+const passwordField = z.string().min(8, 'Hasło musi mieć co najmniej 8 znaków');
 
 export const loginSchema = z.object({
   email: emailField,
@@ -23,11 +22,9 @@ export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z
   .object({
-    code: z
-      .string({ required_error: 'Kod resetujący jest wymagany' })
-      .min(6, 'Kod resetujący powinien mieć co najmniej 6 znaków'),
+    code: z.string().min(6, 'Kod resetujący powinien mieć co najmniej 6 znaków'),
     password: passwordField,
-    confirmPassword: z.string({ required_error: 'Potwierdź nowe hasło' })
+    confirmPassword: z.string().min(1, 'Potwierdź nowe hasło')
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ['confirmPassword'],
@@ -37,15 +34,15 @@ export const resetPasswordSchema = z
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export const profileSchema = z.object({
-  firstName: z
-    .string({ required_error: 'Imię jest wymagane' })
-    .min(2, 'Imię musi mieć co najmniej 2 znaki'),
+  firstName: z.string().min(1, 'Imię jest wymagane').min(2, 'Imię musi mieć co najmniej 2 znaki'),
   lastName: z
-    .string({ required_error: 'Nazwisko jest wymagane' })
+    .string()
+    .min(1, 'Nazwisko jest wymagane')
     .min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
   email: emailField,
   phone: z
-    .string({ required_error: 'Numer telefonu jest wymagany' })
+    .string()
+    .min(1, 'Numer telefonu jest wymagany')
     .regex(/^[0-9+() -]{7,20}$/, 'Podaj prawidłowy numer telefonu'),
   currentPassword: z.string().min(8, 'Hasło musi mieć co najmniej 8 znaków').optional()
 });

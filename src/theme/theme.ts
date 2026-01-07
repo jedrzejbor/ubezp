@@ -2,36 +2,37 @@ import { PaletteMode, ThemeOptions, createTheme } from '@mui/material/styles';
 
 const brandPalette = {
   primary: {
-    main: '#3C5AFE',
-    light: '#6A7CFF',
-    dark: '#2A42D6',
-    contrastText: '#FFFFFF'
+    main: '#1E1F21',
+    light: '#1D1F27',
+    dark: '#0A0B0F',
+    contrastText: '#F7F5F2'
   },
   secondary: {
-    main: '#FF6B6B',
-    light: '#FFA8A8',
-    dark: '#D94A4A',
-    contrastText: '#0F172A'
+    // main: '#A77D67'
+    main: '#8F6D5F',
+    light: '#C39E8E',
+    dark: '#8B6452',
+    contrastText: '#0F1117'
   },
   info: {
-    main: '#3BA7FF',
-    light: '#7BC8FF',
-    dark: '#1B6FB3'
+    main: '#4C91E5',
+    light: '#8CB8F0',
+    dark: '#2C6EB8'
   },
   success: {
-    main: '#22C55E',
-    light: '#63E495',
-    dark: '#178D42'
+    main: '#25B776',
+    light: '#6DD9A8',
+    dark: '#18895A'
   },
   warning: {
-    main: '#F59E0B',
-    light: '#F8C86C',
-    dark: '#B77409'
+    main: '#DFA048',
+    light: '#F0C37F',
+    dark: '#B97D2B'
   },
   error: {
-    main: '#EF4444',
-    light: '#F87171',
-    dark: '#B91C1C'
+    main: '#E86B6B',
+    light: '#F29A9A',
+    dark: '#BC4E4E'
   }
 } satisfies ThemeOptions['palette'];
 
@@ -39,7 +40,7 @@ const typography: ThemeOptions['typography'] = {
   fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   h1: { fontWeight: 700, letterSpacing: '-0.02em' },
   h2: { fontWeight: 700, letterSpacing: '-0.02em' },
-  h3: { fontWeight: 700, letterSpacing: '-0.01em' },
+  h3: { fontWeight: 700, letterSpacing: '-0.01em', fontSize: '1.75rem' },
   h4: { fontWeight: 700 },
   h5: { fontWeight: 600 },
   h6: { fontWeight: 600 },
@@ -49,7 +50,7 @@ const typography: ThemeOptions['typography'] = {
 };
 
 const shape: ThemeOptions['shape'] = {
-  borderRadius: 12
+  borderRadius: 14
 };
 
 const spacing = 8;
@@ -60,7 +61,11 @@ const commonComponents: ThemeOptions['components'] = {
       root: {
         borderRadius: shape.borderRadius,
         paddingInline: spacing * 2,
-        paddingBlock: spacing * 1.25
+        paddingBlock: spacing * 1.25,
+        boxShadow: 'none',
+        '&:hover': {
+          boxShadow: 'none'
+        }
       }
     }
   },
@@ -68,7 +73,8 @@ const commonComponents: ThemeOptions['components'] = {
     defaultProps: { elevation: 0 },
     styleOverrides: {
       root: {
-        borderRadius: shape.borderRadius
+        borderRadius: shape.borderRadius,
+        backgroundImage: 'none'
       }
     }
   },
@@ -86,6 +92,48 @@ const commonComponents: ThemeOptions['components'] = {
         backgroundColor: '#E5EDFF'
       }
     }
+  },
+  MuiTextField: {
+    defaultProps: {
+      variant: 'outlined'
+    },
+    styleOverrides: {
+      root: {
+        '& .MuiOutlinedInput-root': {
+          // borderRadius: shape.borderRadius - 2,
+          borderRadius: 3,
+          backgroundColor: 'var(--mui-palette-background-paper)',
+          '& fieldset': {
+            borderColor: '#D0D5DD'
+          },
+          '&:hover fieldset': {
+            borderColor: '#D0D5DD'
+          },
+          '&.Mui-focused fieldset': {
+            borderWidth: 1.5
+          }
+        }
+      }
+    }
+  },
+  MuiCard: {
+    styleOverrides: {
+      root: {
+        borderColor: 'var(--mui-palette-divider)'
+      }
+    }
+  },
+  MuiDivider: {
+    styleOverrides: {
+      root: {
+        borderColor: 'var(--mui-palette-divider)'
+      }
+    }
+  },
+  MuiLink: {
+    defaultProps: {
+      underline: 'hover'
+    }
   }
 };
 
@@ -96,12 +144,13 @@ export const buildTheme = (mode: PaletteMode) =>
       ...brandPalette,
       background:
         mode === 'light'
-          ? { default: '#F7F8FB', paper: '#FFFFFF' }
-          : { default: '#0B1021', paper: '#11172A' },
+          ? { default: '#F5F3EF', paper: '#FFFFFF' }
+          : { default: '#1E1F21', paper: '#FFFFFF' },
       text:
         mode === 'light'
-          ? { primary: '#0F172A', secondary: '#475569' }
-          : { primary: '#E2E8F0', secondary: '#94A3B8' }
+          ? { primary: '#1A1C22', secondary: '#4C5563' }
+          : { primary: '#1E1F21', secondary: '#32343A' },
+      divider: mode === 'light' ? '#E5E0DA' : '#252C38'
     },
     typography,
     shape,

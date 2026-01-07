@@ -22,6 +22,7 @@ export interface AuthActions {
   setError: (error: string | null) => void;
   clearError: () => void;
   resetAuth: () => void;
+  logout: () => void;
 }
 
 const initialState: AuthState = {
@@ -49,7 +50,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         setLoading: (loading) => set({ loading }, false, 'auth/setLoading'),
         setError: (error) => set({ error }, false, 'auth/setError'),
         clearError: () => set({ error: null }, false, 'auth/clearError'),
-        resetAuth: () => set(initialState, false, 'auth/resetAuth')
+        resetAuth: () => set(initialState, false, 'auth/resetAuth'),
+        logout: () => set(initialState, false, 'auth/logout')
       }),
       {
         name: 'auth-storage',
