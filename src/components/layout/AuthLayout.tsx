@@ -1,6 +1,7 @@
-import { Box, Container, IconButton, Paper, Stack, useTheme } from '@mui/material';
+import { Box, Container, IconButton, Paper, Stack, useTheme, Typography } from '@mui/material';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BrandLogo from '@/components/BrandLogo';
 import { useColorMode } from '@/theme';
 
@@ -85,6 +86,23 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         >
           Copyright © 2024 Cliffsidebrokers
         </Typography> */}
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          justifyContent="center"
+          mt={2}
+          sx={{
+            p: 1.5,
+            borderRadius: '8px',
+            bgcolor: '#000000'
+          }}
+        >
+          <InfoOutlinedIcon sx={{ fontSize: 18, color: '#8F6D5F' }} />
+          <Typography variant="caption" color="#ffffff" sx={{ fontSize: '12px' }}>
+            Potrzebujesz pomocy? Skontaktuj się z zespołem Cliffsidebrokers.
+          </Typography>
+        </Stack>
       </Container>
     </Box>
   );
