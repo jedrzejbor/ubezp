@@ -71,7 +71,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       // gap={2}
     >
       <Stack spacing={1} mb={3}>
-        <Typography variant="h3" component="h1" sx={{ fontSize: '24px', fontWeight: 300 }}>
+        <Typography variant="h5" component="h1" sx={{ fontSize: '24px', fontWeight: 300 }}>
           Witaj!
         </Typography>
         <Typography
