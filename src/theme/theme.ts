@@ -38,19 +38,21 @@ const brandPalette = {
 
 const typography: ThemeOptions['typography'] = {
   fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-  h1: { fontWeight: 700, letterSpacing: '-0.02em' },
-  h2: { fontWeight: 700, letterSpacing: '-0.02em' },
-  h3: { fontWeight: 700, letterSpacing: '-0.01em', fontSize: '1.75rem' },
-  h4: { fontWeight: 700 },
-  h5: { fontWeight: 600 },
-  h6: { fontWeight: 600 },
-  subtitle1: { fontWeight: 500 },
-  subtitle2: { fontWeight: 500 },
+  h1: { fontWeight: 300, letterSpacing: '0px', fontSize: '64px', lineHeight: '80px' },
+  h2: { fontWeight: 300, letterSpacing: '-0.5px', fontSize: '56px', lineHeight: '120px' },
+  h3: { fontWeight: 300, letterSpacing: '0px', fontSize: '48px' },
+  h4: { fontWeight: 300, letterSpacing: '0px', fontSize: '32px' },
+  h5: { fontWeight: 300, letterSpacing: '0.25px', fontSize: '24px' },
+  h6: { fontWeight: 300, letterSpacing: '0.15px', fontSize: '20px', color: '#32343A' },
+  subtitle1: { fontWeight: 400, fontSize: '16px', letterSpacing: '0.15px' },
+  subtitle2: { fontWeight: 500, fontSize: '14px', letterSpacing: '0.1px' },
+  body1: { fontWeight: 400, fontSize: '16px', letterSpacing: '0.15px' },
+  body2: { fontWeight: 400, fontSize: '14px', letterSpacing: '0.17px' },
   button: { fontWeight: 600, textTransform: 'none', letterSpacing: '0.01em' }
 };
 
 const shape: ThemeOptions['shape'] = {
-  borderRadius: 14
+  borderRadius: 8
 };
 
 const spacing = 8;
@@ -65,6 +67,13 @@ const commonComponents: ThemeOptions['components'] = {
         boxShadow: 'none',
         '&:hover': {
           boxShadow: 'none'
+        }
+      },
+      contained: {
+        '&.Mui-disabled': {
+          backgroundColor: '#8F6D5F',
+          color: '#FFFFFF',
+          opacity: 0.5
         }
       }
     }

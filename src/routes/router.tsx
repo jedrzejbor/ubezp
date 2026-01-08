@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AccountPage from '@/pages/AccountPage';
 import DashboardPage from '@/pages/DashboardPage';
 import LoginPage from '@/pages/LoginPage';
+import TwoFactorAuthPage from '@/pages/TwoFactorAuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import AppErrorBoundary from '@/routes/AppErrorBoundary';
 import ProtectedRoute from '@/routes/ProtectedRoute';
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: '/reset-password',
         element: <LoginPage initialStage="forgot" />
+      },
+      {
+        path: '/verify',
+        element: <TwoFactorAuthPage />
       }
     ]
   },
