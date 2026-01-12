@@ -1,6 +1,6 @@
-import { CssBaseline, PaletteMode, useMediaQuery } from '@mui/material';
+import { CssBaseline, PaletteMode } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { buildTheme } from './theme';
 
@@ -19,15 +19,11 @@ interface BrandThemeProviderProps {
 }
 
 export const BrandThemeProvider: React.FC<BrandThemeProviderProps> = ({ children }) => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const [mode, setMode] = useState<PaletteMode>(prefersDarkMode ? 'dark' : 'light');
-
-  useEffect(() => {
-    setMode(prefersDarkMode ? 'dark' : 'light');
-  }, [prefersDarkMode]);
+  // Default to light mode for the application. Users can still toggle it at runtime.
+  const [mode, setMode] = useState<PaletteMode>('light');
 
   const toggleColorMode = useCallback(() => {
-    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
 
   const theme = useMemo(() => buildTheme(mode), [mode]);
