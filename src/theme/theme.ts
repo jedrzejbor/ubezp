@@ -90,7 +90,10 @@ const commonComponents: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         borderRadius: shape.borderRadius,
-        backgroundImage: 'none'
+        backgroundImage: 'none',
+        backgroundColor: 'transparent',
+        border: 'none',
+        boxShadow: 'none !important'
       }
     }
   },
