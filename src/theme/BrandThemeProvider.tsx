@@ -1,6 +1,7 @@
 import { CssBaseline, PaletteMode } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { useUiStore } from '@/store/uiStore';
 
 import { buildTheme } from './theme';
 
@@ -19,12 +20,12 @@ interface BrandThemeProviderProps {
 }
 
 export const BrandThemeProvider: React.FC<BrandThemeProviderProps> = ({ children }) => {
-  // Default to light mode for the application. Users can still toggle it at runtime.
-  const [mode, setMode] = useState<PaletteMode>('light');
+  const { themeMode, setThemeMode } = useUiStore();
+  const mode: PaletteMode = themeMode ?? 'light';
 
   const toggleColorMode = useCallback(() => {
-    setMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  }, []);
+    setThemeMode(mode === 'dark' ? 'light' : 'dark');
+  }, [mode, setThemeMode]);
 
   const theme = useMemo(() => buildTheme(mode), [mode]);
 
