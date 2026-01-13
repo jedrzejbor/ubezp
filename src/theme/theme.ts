@@ -69,6 +69,13 @@ const commonComponents: ThemeOptions['components'] = {
           boxShadow: 'none'
         }
       },
+      outlined: {
+        // ensure outlined variant uses the design border color
+        borderColor: '#D0D5DD',
+        '&:hover': {
+          borderColor: '#D0D5DD'
+        }
+      },
       contained: {
         '&.Mui-disabled': {
           backgroundColor: '#8F6D5F',
@@ -83,7 +90,10 @@ const commonComponents: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         borderRadius: shape.borderRadius,
-        backgroundImage: 'none'
+        backgroundImage: 'none',
+        backgroundColor: 'transparent',
+        border: 'none',
+        boxShadow: 'none !important'
       }
     }
   },

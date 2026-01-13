@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Divider,
   IconButton,
   InputAdornment,
   Link,
@@ -10,7 +9,6 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { useState } from 'react';
@@ -42,7 +40,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { addToast } = useUiStore();
 
   const [showPassword, setShowPassword] = useState(false);
-  const theme = useTheme();
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
@@ -63,14 +60,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      display="flex"
-      flexDirection="column"
-      // gap={2}
-    >
-      <Stack spacing={1} mb={3}>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column">
+      <Stack
+        spacing={1}
+        mb={3}
+        sx={{
+          borderBottom: 1,
+          borderColor: 'rgba(143, 109, 95, 0.12)',
+          pt: 2,
+          pb: 2
+        }}
+      >
         <Typography variant="h5" component="h1" sx={{ fontSize: '24px', fontWeight: 300 }}>
           Witaj!
         </Typography>
@@ -146,37 +146,42 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </Button>
       </Stack>
 
-      <Divider
-        variant="middle"
+      <Box
         sx={{
-          // width: 247,
-          // height: '1px',
-          borderColor: alpha(theme.palette.secondary.main, 0.12),
-          mt: 4,
-          mb: 2
+          borderTop: 1,
+          borderColor: 'rgba(143, 109, 95, 0.12)',
+          pt: 2,
+          pb: 2,
+          mt: 4
         }}
-      />
-      <Stack direction="row" spacing={1.5} justifyContent="center" mt={0} color="text.secondary">
-        <Link href="#" underline="hover" color="text.secondary" variant="body2">
-          Regulaminy
-        </Link>
-        <Typography variant="body2" component="span">
-          |
-        </Typography>
-        <Link href="#" underline="hover" color="text.secondary" variant="body2">
-          Polityka prywatności
-        </Link>
-      </Stack>
-
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        textAlign="center"
-        mt={0.5}
-        sx={{ letterSpacing: '0.02em' }}
       >
-        Copyright © 2024 Cliffsidebrokers
-      </Typography>
+        <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+          <Link
+            href="#"
+            underline="hover"
+            sx={{
+              color: '#8F6D5F',
+              fontSize: '14px',
+              fontWeight: 400,
+              '&:hover': { color: '#8F6D5F' }
+            }}
+          >
+            Regulaminy
+          </Link>
+          <Link
+            href="#"
+            underline="hover"
+            sx={{
+              color: '#8F6D5F',
+              fontSize: '14px',
+              fontWeight: 400,
+              '&:hover': { color: '#8F6D5F' }
+            }}
+          >
+            Polityka prywatności
+          </Link>
+        </Stack>
+      </Box>
     </Box>
   );
 };

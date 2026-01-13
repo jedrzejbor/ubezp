@@ -4,6 +4,8 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BrandLogo from '@/components/BrandLogo';
 import { useColorMode } from '@/theme';
+import heroDesktop from '@/assets/hero-desktop.jpg';
+import { useLocation } from 'react-router-dom';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -12,6 +14,7 @@ interface AuthLayoutProps {
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
   const theme = useTheme();
   const { toggleColorMode, mode } = useColorMode();
+  const location = useLocation();
 
   const isLight = theme.palette.mode === 'light';
 
@@ -19,91 +22,255 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: isLight
-          ? 'linear-gradient(180deg, #FFFFFF 0%, #F5F3EF 100%)'
-          : 'linear-gradient(180deg, #0E1117 0%, #0C0F14 100%)',
         display: 'flex',
-        alignItems: 'stretch',
-        position: 'relative'
+        flexDirection: { xs: 'column', lg: 'row' },
+        position: 'relative',
+        p: { xs: 0, lg: '20px' },
+        bgcolor: { xs: 'transparent', lg: '#ffffff' }
       }}
     >
-      <Container
-        maxWidth="sm"
-        sx={{ display: 'flex', flexDirection: 'column', py: { xs: 6, md: 8 } }}
+      {/* Desktop wrapper with rounded corners */}
+      <Box
+        sx={{
+          display: { xs: 'none', lg: 'flex' },
+          flex: 1,
+          borderRadius: '24px',
+          position: 'relative'
+        }}
       >
-        <Stack direction="row" justifyContent="flex-end" mb={3}>
-          <IconButton
-            aria-label="Przełącz motyw"
-            onClick={toggleColorMode}
-            color="inherit"
+        {/* Left side - Form */}
+        <Box
+          sx={{
+            flex: '0 0 640px',
+            minHeight: 'calc(100vh - 40px)',
+            background: isLight
+              ? 'linear-gradient(180deg, #FFFFFF 0%, #F5F3EF 100%)'
+              : 'linear-gradient(180deg, #0E1117 0%, #0C0F14 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            boxShadow: '56px 10px 37px 34px rgba(0, 0, 0, 0.2)',
+            zIndex: 2,
+            borderTopLeftRadius: '24px',
+            borderBottomLeftRadius: '24px'
+          }}
+        >
+          <Box
             sx={{
-              border: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.paper'
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              py: 5,
+              px: 3
             }}
           >
-            {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
-          </IconButton>
-        </Stack>
+            {/* Desktop: Logo at center top */}
+            <Stack spacing={2} alignItems="center" sx={{ mb: 2, mt: 10 }}>
+              <BrandLogo size="md" />
+            </Stack>
 
-        <Stack spacing={3} alignItems="center" justifyContent="center" flex={1}>
-          <Stack spacing={2} alignItems="center">
+            {/* Form content - centered */}
+            <Stack
+              spacing={3}
+              alignItems="center"
+              justifyContent="flex-start"
+              flex={1}
+              sx={{ maxWidth: 420, mx: 'auto', width: '100%' }}
+            >
+              <Paper
+                variant="outlined"
+                sx={{
+                  width: '100%',
+                  p: '32px 24px',
+                  boxShadow: isLight
+                    ? '0px 14px 46px rgba(23, 26, 31, 0.06)'
+                    : '0px 14px 46px rgba(0, 0, 0, 0.48)'
+                }}
+              >
+                {children}
+              </Paper>
+
+              {location.pathname === '/verify' && (
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  justifyContent="center"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '8px',
+                    bgcolor: '#000000',
+                    width: '100%'
+                  }}
+                >
+                  <InfoOutlinedIcon sx={{ fontSize: 18, color: '#8F6D5F' }} />
+                  <Typography variant="caption" color="#ffffff" sx={{ fontSize: '12px' }}>
+                    Potrzebujesz pomocy? Skontaktuj się z zespołem Cliffsidebrokers.
+                  </Typography>
+                </Stack>
+              )}
+            </Stack>
+
+            {/* Footer section - at bottom */}
+            <Box sx={{ mt: 'auto' }}>
+              {/* Copyright - separate section at very bottom */}
+              <Box
+                sx={{
+                  borderTop: 1,
+                  borderColor: 'rgba(143, 109, 95, 0.12)',
+                  pt: 1.5,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'rgba(0, 0, 0, 0.87)',
+                    fontSize: '12px',
+                    letterSpacing: '0.4px'
+                  }}
+                >
+                  Copyright © 2024 Cliffsidebroekrs
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Right side - Hero Image (Desktop only) */}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 'calc(100vh - 40px)',
+            position: 'relative',
+            overflow: 'hidden',
+            bgcolor: '#1E1F21',
+            borderTopRightRadius: '24px',
+            borderBottomRightRadius: '24px'
+          }}
+        >
+          <Box
+            component="img"
+            src={heroDesktop}
+            alt="Cliffside Brokers"
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Mobile Layout */}
+      <Box
+        sx={{
+          display: { xs: 'flex', lg: 'none' },
+          flex: 1,
+          minHeight: '100vh',
+          background: isLight
+            ? 'linear-gradient(180deg, #FFFFFF 0%, #F5F3EF 100%)'
+            : 'linear-gradient(180deg, #0E1117 0%, #0C0F14 100%)',
+          flexDirection: 'column'
+        }}
+      >
+        <Container
+          maxWidth="sm"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            py: 4,
+            px: 2,
+            flex: 1
+          }}
+        >
+          {/* Logo at top - only on mobile */}
+          <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
             <BrandLogo size="lg" />
           </Stack>
 
-          <Paper
-            variant="outlined"
+          {/* Theme toggle - mobile */}
+          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+            <IconButton
+              aria-label="Przełącz motyw"
+              onClick={toggleColorMode}
+              color="inherit"
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.paper'
+              }}
+            >
+              {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
+            </IconButton>
+          </Stack>
+
+          {/* Form content - centered vertically */}
+          <Stack
+            spacing={3}
+            alignItems="center"
+            justifyContent="center"
+            flex={1}
+            sx={{ width: '100%' }}
+          >
+            <Paper
+              variant="outlined"
+              sx={{
+                width: '100%',
+                p: '32px 16px',
+                boxShadow: isLight
+                  ? '0px 14px 46px rgba(23, 26, 31, 0.06)'
+                  : '0px 14px 46px rgba(0, 0, 0, 0.48)'
+              }}
+            >
+              {children}
+            </Paper>
+
+            {location.pathname === '/verify' && (
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                justifyContent="center"
+                sx={{
+                  p: 1.5,
+                  borderRadius: '8px',
+                  bgcolor: '#000000',
+                  width: '100%'
+                }}
+              >
+                <InfoOutlinedIcon sx={{ fontSize: 18, color: '#8F6D5F' }} />
+                <Typography variant="caption" color="#ffffff" sx={{ fontSize: '12px' }}>
+                  Potrzebujesz pomocy? Skontaktuj się z zespołem Cliffsidebrokers.
+                </Typography>
+              </Stack>
+            )}
+          </Stack>
+
+          {/* Copyright - mobile */}
+          <Box
             sx={{
-              width: '100%',
-              p: '40px 16px 32px',
-              boxShadow: isLight
-                ? '0px 14px 46px rgba(23, 26, 31, 0.06)'
-                : '0px 14px 46px rgba(0, 0, 0, 0.48)'
+              borderTop: 1,
+              borderColor: 'rgba(143, 109, 95, 0.12)',
+              pt: 1.5,
+              mt: 3,
+              textAlign: 'center'
             }}
           >
-            {children}
-          </Paper>
-        </Stack>
-
-        {/* <Stack direction="row" spacing={1.5} justifyContent="center" mt={4} color="text.secondary">
-          <Typography variant="body2" component="span">
-            Regulaminy
-          </Typography>
-          <Typography variant="body2" component="span">
-            |
-          </Typography>
-          <Typography variant="body2" component="span">
-            Polityka prywatności
-          </Typography>
-        </Stack>
-
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          textAlign="center"
-          mt={1.5}
-          sx={{ letterSpacing: '0.02em' }}
-        >
-          Copyright © 2024 Cliffsidebrokers
-        </Typography> */}
-        <Stack
-          direction="row"
-          spacing={1}
-          alignItems="center"
-          justifyContent="center"
-          mt={2}
-          sx={{
-            p: 1.5,
-            borderRadius: '8px',
-            bgcolor: '#000000'
-          }}
-        >
-          <InfoOutlinedIcon sx={{ fontSize: 18, color: '#8F6D5F' }} />
-          <Typography variant="caption" color="#ffffff" sx={{ fontSize: '12px' }}>
-            Potrzebujesz pomocy? Skontaktuj się z zespołem Cliffsidebrokers.
-          </Typography>
-        </Stack>
-      </Container>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'rgba(0, 0, 0, 0.87)',
+                fontSize: '12px',
+                letterSpacing: '0.4px'
+              }}
+            >
+              Copyright © 2024 Cliffsidebroekrs
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
     </Box>
   );
 };

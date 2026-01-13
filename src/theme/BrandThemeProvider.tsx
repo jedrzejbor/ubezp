@@ -1,6 +1,7 @@
-import { CssBaseline, PaletteMode, useMediaQuery } from '@mui/material';
+import { CssBaseline, PaletteMode } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { useUiStore } from '@/store/uiStore';
 
 import { buildTheme } from './theme';
 
@@ -19,16 +20,12 @@ interface BrandThemeProviderProps {
 }
 
 export const BrandThemeProvider: React.FC<BrandThemeProviderProps> = ({ children }) => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const [mode, setMode] = useState<PaletteMode>(prefersDarkMode ? 'dark' : 'light');
-
-  useEffect(() => {
-    setMode(prefersDarkMode ? 'dark' : 'light');
-  }, [prefersDarkMode]);
+  const { themeMode, setThemeMode } = useUiStore();
+  const mode: PaletteMode = themeMode ?? 'light';
 
   const toggleColorMode = useCallback(() => {
-    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
-  }, []);
+    setThemeMode(mode === 'dark' ? 'light' : 'dark');
+  }, [mode, setThemeMode]);
 
   const theme = useMemo(() => buildTheme(mode), [mode]);
 
