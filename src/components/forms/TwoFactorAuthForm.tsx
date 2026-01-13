@@ -195,12 +195,14 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
                 textAlign: 'center',
                 fontSize: '24px',
                 fontWeight: 500,
-                padding: '16px 12px'
+                padding: '0',
+                height: 64,
+                width: 56
               }
             }}
             sx={{
-              height: 56,
-              width: 64,
+              height: 64,
+              width: 56,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '4px'
               }
@@ -221,12 +223,7 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
         Potwierdź
       </Button>
 
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        textAlign="center"
-        sx={{ fontSize: '13px', mb: 2 }}
-      >
+      <Typography variant="body2" color="#74767f" textAlign="justify" sx={{ mb: 2 }}>
         Otrzymanie kodu może zająć chwilę. Jeżeli kod nie dotarł spróbuj wysłać go ponownie
       </Typography>
 
