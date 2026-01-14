@@ -66,7 +66,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           >
             {/* Desktop: Logo at center top */}
             <Stack spacing={2} alignItems="center" sx={{ mb: 2, mt: 10 }}>
-              <BrandLogo size="md" />
+              {location.pathname !== '/verify' && <BrandLogo size="md" />}
             </Stack>
 
             {/* Form content - centered */}
@@ -187,7 +187,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         >
           {/* Logo at top - only on mobile */}
           <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
-            <BrandLogo size="lg" />
+            {location.pathname !== '/verify' && <BrandLogo size="lg" />}
           </Stack>
 
           {/* Theme toggle - mobile */}
