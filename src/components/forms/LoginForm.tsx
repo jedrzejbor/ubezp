@@ -66,7 +66,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         mb={3}
         sx={{
           borderBottom: 1,
-          borderColor: 'rgba(143, 109, 95, 0.12)',
+          borderColor: 'secondary.main',
           pt: 2,
           pb: 2
         }}
@@ -116,7 +116,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             component="button"
             type="button"
             onClick={onForgotPassword}
-            sx={{ color: 'secondary.main', mt: '-4px', mb: '20px' }}
+            sx={{
+              color: 'secondary.main',
+              mt: '-4px',
+              mb: '20px',
+              fontSize: '14px',
+              fontWeight: 500
+            }}
           >
             Nie pamiętam hasła
           </Link>
@@ -131,7 +137,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           size="large"
           disabled={loading}
           startIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
-          sx={{ height: 40, py: '8px', px: '22px' }}
+          sx={{ height: 40, py: '8px', px: '22px', fontSize: '14px' }}
         >
           Zaloguj się
         </Button>
@@ -140,7 +146,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           variant="outlined"
           onClick={onBecomeClient}
           fullWidth
-          sx={{ height: 40, py: '8px', px: '19px' }}
+          sx={{ height: 40, py: '8px', px: '19px', fontSize: '14px' }}
         >
           Chcę zostać klientem Cliffside Brokers
         </Button>
@@ -149,7 +155,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <Box
         sx={{
           borderTop: 1,
-          borderColor: 'rgba(143, 109, 95, 0.12)',
+          borderColor: 'secondary.main',
           pt: 2,
           pb: 2,
           mt: 4
@@ -158,7 +164,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
           <Link
             href="#"
-            underline="hover"
+            underline="always"
             sx={{
               color: '#8F6D5F',
               fontSize: '14px',
@@ -170,7 +176,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </Link>
           <Link
             href="#"
-            underline="hover"
+            underline="always"
             sx={{
               color: '#8F6D5F',
               fontSize: '14px',
