@@ -13,13 +13,13 @@ import { useState, useRef, KeyboardEvent, ClipboardEvent } from 'react';
 import { useUiStore } from '@/store/uiStore';
 
 export interface TwoFactorAuthFormProps {
-  phoneNumber?: string;
+  email?: string;
   onSuccess?: () => void;
   onResend?: () => void;
 }
 
 export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
-  phoneNumber = '***-***-896',
+  email = 'test@test.com',
   onSuccess,
   onResend
 }) => {
@@ -176,7 +176,7 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
         Wprowadź kod wysłany na
         <br />
         <Box component="span" sx={{ fontWeight: 600 }}>
-          {phoneNumber}
+          {email}
         </Box>
       </Typography>
 
