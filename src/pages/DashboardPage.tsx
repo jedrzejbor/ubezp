@@ -1,4 +1,5 @@
 import { Grid, Paper, Stack, Typography, Skeleton, Box, Chip, Button } from '@mui/material';
+import { useAuthStore } from '@/store/authStore';
 import { useEffect, useState } from 'react';
 import { mockDashboardSummary, type DashboardSummary } from '@/services/authService';
 
@@ -41,10 +42,7 @@ const DashboardPage: React.FC = () => {
       >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
-            Witaj ponownie!
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Podsumowanie Twojego konta i ostatnich aktywności.
+            {`Witaj${useAuthStore.getState().user?.name ? ' ' + useAuthStore.getState().user?.name : ''}`}
           </Typography>
         </Box>
         <Box flex={1} />
