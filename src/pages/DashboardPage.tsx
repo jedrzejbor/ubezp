@@ -25,6 +25,7 @@ const SummaryCard: React.FC<{ title: string; value?: string; loading?: boolean }
 const DashboardPage: React.FC = () => {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     mockDashboardSummary()
@@ -42,7 +43,7 @@ const DashboardPage: React.FC = () => {
       >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
-            {`Witaj${useAuthStore.getState().user?.name ? ' ' + useAuthStore.getState().user?.name : ''}`}
+            {`Witaj${user?.name ? ' ' + user.name : ''}`}
           </Typography>
         </Box>
         <Box flex={1} />

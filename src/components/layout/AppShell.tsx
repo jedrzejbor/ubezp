@@ -23,6 +23,7 @@ import {
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import BrandLogo from '@/components/BrandLogo';
+import { MobileNavigation } from '@/components/navigation/MobileNavigation';
 import { useColorMode } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 
@@ -83,7 +84,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{ sx: { fontSize: '14px', fontWeight: 500 } }}
+              />
             </ListItemButton>
           );
         })}
@@ -159,9 +163,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
         {drawerContent}
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 3, md: 4 }, mt: 8, width: '100%' }}>
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 3, md: 4 }, mt: 8, mb: 8, width: '100%' }}>
         {children}
       </Box>
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
     </Box>
   );
 };

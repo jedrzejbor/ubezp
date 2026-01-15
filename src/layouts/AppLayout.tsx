@@ -1,5 +1,5 @@
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
-import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import { Container } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 
@@ -7,8 +7,16 @@ import AppShell from '@/components/layout/AppShell';
 import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
-  { label: 'Panel główny', to: '/app', icon: <DashboardRoundedIcon fontSize="small" /> },
-  { label: 'Konto', to: '/konto', icon: <ManageAccountsRoundedIcon fontSize="small" /> }
+  {
+    label: 'Panel główny',
+    to: '/app',
+    icon: <DashboardOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />
+  },
+  {
+    label: 'Konto',
+    to: '/konto',
+    icon: <ManageAccountsOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />
+  }
 ];
 
 const AppLayout = () => {
