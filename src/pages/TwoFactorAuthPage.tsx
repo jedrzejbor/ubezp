@@ -14,11 +14,7 @@ export const TwoFactorAuthPage: React.FC = () => {
   };
 
   return (
-    <TwoFactorAuthForm
-      phoneNumber="***-***-896"
-      onSuccess={handleSuccess}
-      onResend={handleResend}
-    />
+    <TwoFactorAuthForm email="test@test.com" onSuccess={handleSuccess} onResend={handleResend} />
   );
 };
 

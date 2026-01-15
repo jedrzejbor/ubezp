@@ -3,6 +3,7 @@ import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BrandLogo from '@/components/BrandLogo';
+import backgroundImage from '@/assets/background-image.svg';
 import { useColorMode } from '@/theme';
 import heroDesktop from '@/assets/hero-desktop.jpg';
 import { useLocation } from 'react-router-dom';
@@ -52,7 +53,12 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             boxShadow: '56px 10px 37px 34px rgba(0, 0, 0, 0.2)',
             zIndex: 2,
             borderTopLeftRadius: '24px',
-            borderBottomLeftRadius: '24px'
+            borderBottomLeftRadius: '24px',
+            // Desktop only background image anchored to left edge
+            backgroundImage: { xs: 'none', lg: `url(${backgroundImage})` },
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'left bottom',
+            backgroundSize: { xs: 'auto', lg: 'auto 70%' }
           }}
         >
           <Box
@@ -61,12 +67,13 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
               flexDirection: 'column',
               flex: 1,
               py: 5,
+              pb: 1.75,
               px: 3
             }}
           >
             {/* Desktop: Logo at center top */}
             <Stack spacing={2} alignItems="center" sx={{ mb: 2, mt: 10 }}>
-              <BrandLogo size="md" />
+              {location.pathname !== '/verify' && <BrandLogo size="md" />}
             </Stack>
 
             {/* Form content - centered */}
@@ -125,6 +132,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
                 <Typography
                   variant="caption"
                   sx={{
+                    fontFamily: "'Source Sans Pro', sans-serif",
+                    fontWeight: 400,
                     color: 'rgba(0, 0, 0, 0.87)',
                     fontSize: '12px',
                     letterSpacing: '0.4px'
@@ -187,7 +196,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         >
           {/* Logo at top - only on mobile */}
           <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
-            <BrandLogo size="lg" />
+            {location.pathname !== '/verify' && <BrandLogo size="lg" />}
           </Stack>
 
           {/* Theme toggle - mobile */}
@@ -261,8 +270,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             <Typography
               variant="caption"
               sx={{
+                fontFamily: "'Source Sans Pro', sans-serif",
+                fontWeight: 400,
                 color: 'rgba(0, 0, 0, 0.87)',
-                fontSize: '12px',
+                fontSize: '14px',
                 letterSpacing: '0.4px'
               }}
             >
