@@ -55,6 +55,62 @@ export const router = createBrowserRouter([
         )
       },
       {
+        path: '/app/dashboard',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/policies',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/claims',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/payments',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/documents',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/settings',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/app/support',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/konto',
         element: (
           <ProtectedRoute>
