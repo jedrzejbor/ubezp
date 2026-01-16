@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box } from '@mui/material';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import type { SvgIconProps } from '@mui/material/SvgIcon';
 import type { SxProps, Theme } from '@mui/system';
 
@@ -7,6 +8,7 @@ import type { SxProps, Theme } from '@mui/system';
 const FIGMA_HOME_SVG = 'http://localhost:3845/assets/e6eeaffa20fce38d9f2cfe4412ceed7ea055fe65.svg';
 
 const HomeIcon: React.FC<SvgIconProps> = (props) => {
+  const [failed, setFailed] = useState(false);
   const { sx, fontSize } = props as { sx?: SxProps<Theme>; fontSize?: SvgIconProps['fontSize'] };
 
   // Determine size: allow overriding via sx.fontSize (number or numeric string) or fontSize prop
@@ -26,11 +28,26 @@ const HomeIcon: React.FC<SvgIconProps> = (props) => {
     }
   }
 
+  if (failed) {
+    // fallback to MUI icon so the app always shows an icon
+    return (
+      <HomeOutlinedIcon
+        sx={{
+          fontSize: resolvedSize,
+          width: resolvedSize,
+          height: resolvedSize,
+          ...(sx as object)
+        }}
+      />
+    );
+  }
+
   return (
     <Box
       component="img"
       src={FIGMA_HOME_SVG}
       alt="home"
+      onError={() => setFailed(true)}
       sx={{ width: resolvedSize, height: resolvedSize, display: 'block', ...(sx as object) }}
     />
   );
