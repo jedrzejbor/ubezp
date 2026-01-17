@@ -205,6 +205,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
           open={accountDrawerOpen}
           onClose={toggleAccountDrawer}
           sx={{
+            // Ensure the Drawer root has higher stacking context so it appears above the main menu
+            zIndex: (theme) => theme.zIndex.modal + 2000,
             '& .MuiDrawer-paper': {
               borderRadius: '16px 16px 0 0',
               backgroundColor: theme.palette.mode === 'light' ? '#FFFFFF' : '#1A1B1F',
