@@ -74,7 +74,7 @@ export const MobileNavigation: React.FC = () => {
           right: 0,
           height: '80px',
           p: '8px 16px',
-          borderRadius: '16px',
+          borderRadius: '16px 16px 0 0',
           bgcolor: '#1E1F21',
           borderTop: 1,
           borderColor: 'divider',
@@ -168,7 +168,7 @@ export const MobileNavigation: React.FC = () => {
             left: 0,
             right: 0,
             position: 'fixed',
-            borderRadius: '16px',
+            borderRadius: '16px 16px 0 0',
             backgroundColor: theme.palette.mode === 'light' ? '#FFFFFF' : '#1A1B1F',
             zIndex: (theme) => theme.zIndex.modal
           }
