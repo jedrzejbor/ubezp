@@ -34,9 +34,9 @@ export const MobileNavigation: React.FC = () => {
     navigate(path);
   };
 
-  const handleMoreClick = () => {
-    setMoreDrawerOpen(true);
-  };
+  // const handleMoreClick = () => {
+  //   setMoreDrawerOpen(true);
+  // };
 
   const handleMoreItemClick = (path: string) => {
     handleNavigate(path);
@@ -54,11 +54,17 @@ export const MobileNavigation: React.FC = () => {
         showLabels
         value={moreDrawerOpen ? 'more' : currentValue}
         onChange={(_, newValue) => {
+          // Toggle drawer when 'more' is clicked
+          if (newValue === 'more') {
+            setMoreDrawerOpen((open) => !open);
+            return;
+          }
+
           const item = mobileItems.find((i) => i.id === newValue);
           if (item) {
+            // close the drawer (if open) and navigate
+            setMoreDrawerOpen(false);
             handleNavigate(item.path);
-          } else if (newValue === 'more') {
-            setMoreDrawerOpen(true);
           }
         }}
         sx={{
@@ -68,11 +74,11 @@ export const MobileNavigation: React.FC = () => {
           right: 0,
           height: '80px',
           p: '8px 16px',
-          borderRadius: '16px',
+          borderRadius: '16px 16px 0 0',
           bgcolor: '#1E1F21',
           borderTop: 1,
           borderColor: 'divider',
-          zIndex: 1000,
+          zIndex: (theme) => theme.zIndex.modal + 10,
           '& .MuiBottomNavigationAction-root': {
             // distribute actions evenly across the bar
             flex: 1,
@@ -137,7 +143,6 @@ export const MobileNavigation: React.FC = () => {
             label="Więcej"
             value="more"
             icon={<GridViewOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />}
-            onClick={handleMoreClick}
             sx={{ color: 'rgba(255, 255, 255, 0.7)', '&.Mui-selected': { color: '#FFFFFF' } }}
           />
         )}
@@ -148,6 +153,14 @@ export const MobileNavigation: React.FC = () => {
         anchor="bottom"
         open={moreDrawerOpen}
         onClose={() => setMoreDrawerOpen(false)}
+        ModalProps={{
+          // keep the backdrop from covering the bottom nav by shortening it
+          BackdropProps: {
+            sx: {
+              bottom: '80px'
+            }
+          }
+        }}
         sx={{
           '& .MuiDrawer-paper': {
             // position the drawer *above* the bottom nav bar (bar height = 80px)
@@ -155,7 +168,7 @@ export const MobileNavigation: React.FC = () => {
             left: 0,
             right: 0,
             position: 'fixed',
-            borderRadius: '16px',
+            borderRadius: '16px 16px 0 0',
             backgroundColor: theme.palette.mode === 'light' ? '#FFFFFF' : '#1A1B1F',
             zIndex: (theme) => theme.zIndex.modal
           }

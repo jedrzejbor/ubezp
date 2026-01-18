@@ -5,6 +5,7 @@ import DashboardPage from '@/pages/DashboardPage';
 import LoginPage from '@/pages/LoginPage';
 import TwoFactorAuthPage from '@/pages/TwoFactorAuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import SettingsPage from '@/pages/SettingsPage';
 import AppErrorBoundary from '@/routes/AppErrorBoundary';
 import ProtectedRoute from '@/routes/ProtectedRoute';
 import AppLayout from '@/layouts/AppLayout';
@@ -98,7 +99,7 @@ export const router = createBrowserRouter([
         path: '/app/settings',
         element: (
           <ProtectedRoute>
-            <DashboardPage />
+            <SettingsPage />
           </ProtectedRoute>
         )
       },

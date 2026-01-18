@@ -1,4 +1,3 @@
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
 import WbSunnyRoundedIcon from '@mui/icons-material/WbSunnyRounded';
@@ -40,13 +39,16 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
+  const [accountDrawerOpen, setAccountDrawerOpen] = React.useState(false);
   const { toggleColorMode, mode } = useColorMode();
   const { user, resetAuth } = useAuthStore();
 
   const toggleDrawer = () => setOpen((prev) => !prev);
+  const toggleAccountDrawer = () => setAccountDrawerOpen((prev) => !prev);
 
   const handleLogout = () => {
     resetAuth();
+    setAccountDrawerOpen(false);
     onLogout?.();
   };
 
@@ -123,25 +125,51 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
           width: isMdUp ? `calc(100% - ${drawerWidth}px)` : '100%'
         }}
       >
-        <Toolbar sx={{ display: 'flex', gap: 1.5 }}>
-          {!isMdUp && (
-            <IconButton edge="start" onClick={toggleDrawer} aria-label="Otwórz nawigację">
-              <MenuRoundedIcon />
-            </IconButton>
+        <Toolbar sx={{ display: 'flex', gap: 1.5, justifyContent: 'space-between' }}>
+          {isMdUp ? (
+            <>
+              {/* Desktop: hamburger removed, title and actions */}
+              <Typography variant="h6" sx={{ flex: 1 }}>
+                Panel klienta
+              </Typography>
+              <Tooltip title="Przełącz motyw">
+                <IconButton onClick={toggleColorMode} color="primary">
+                  {mode === 'light' ? <NightlightRoundRoundedIcon /> : <WbSunnyRoundedIcon />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Wyloguj">
+                <IconButton color="primary" onClick={handleLogout}>
+                  <LogoutRoundedIcon />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              {/* Mobile: clickable logo + avatar */}
+              <IconButton
+                component={NavLink}
+                to="/app/dashboard"
+                edge="start"
+                aria-label="Dashboard"
+                sx={{ p: 0.5 }}
+              >
+                <BrandLogo size="sm" />
+              </IconButton>
+              <Box flex={1} />
+              <IconButton edge="end" onClick={toggleAccountDrawer} aria-label="Konto">
+                <Avatar
+                  sx={{
+                    bgcolor: 'secondary.main',
+                    color: 'secondary.contrastText',
+                    width: 40,
+                    height: 40
+                  }}
+                >
+                  {user?.name?.[0] ?? 'C'}
+                </Avatar>
+              </IconButton>
+            </>
           )}
-          <Typography variant="h6" sx={{ flex: 1 }}>
-            Panel klienta
-          </Typography>
-          <Tooltip title="Przełącz motyw">
-            <IconButton onClick={toggleColorMode} color="primary">
-              {mode === 'light' ? <NightlightRoundRoundedIcon /> : <WbSunnyRoundedIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Wyloguj">
-            <IconButton color="primary" onClick={handleLogout}>
-              <LogoutRoundedIcon />
-            </IconButton>
-          </Tooltip>
         </Toolbar>
       </AppBar>
 
@@ -169,6 +197,62 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
 
       {/* Mobile Navigation */}
       <MobileNavigation />
+
+      {/* Mobile Account Drawer (bottom sheet) */}
+      {!isMdUp && (
+        <Drawer
+          anchor="bottom"
+          open={accountDrawerOpen}
+          onClose={toggleAccountDrawer}
+          sx={{
+            // Ensure the Drawer root has higher stacking context so it appears above the main menu
+            zIndex: (theme) => theme.zIndex.modal + 2000,
+            '& .MuiDrawer-paper': {
+              borderRadius: '16px 16px 0 0',
+              backgroundColor: theme.palette.mode === 'light' ? '#FFFFFF' : '#1A1B1F',
+              p: 3
+            }
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Avatar
+                sx={{
+                  bgcolor: 'secondary.main',
+                  color: 'secondary.contrastText',
+                  width: 48,
+                  height: 48
+                }}
+              >
+                {user?.name?.[0] ?? 'C'}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle1" fontWeight={500}>
+                  {user?.name ?? 'Gość'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {user?.email ?? 'brak danych'}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider />
+
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                borderRadius: 2,
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <LogoutRoundedIcon />
+              </ListItemIcon>
+              <ListItemText primary="Wyloguj" />
+            </ListItemButton>
+          </Stack>
+        </Drawer>
+      )}
     </Box>
   );
 };
