@@ -12,7 +12,7 @@ const brandPalette = {
     main: '#8F6D5F',
     light: '#C39E8E',
     dark: '#8B6452',
-    contrastText: '#0F1117'
+    contrastText: '#FFFFFF'
   },
   info: {
     main: '#4C91E5',
@@ -48,6 +48,7 @@ const typography: ThemeOptions['typography'] = {
   subtitle2: { fontWeight: 500, fontSize: '14px', letterSpacing: '0.1px' },
   body1: { fontWeight: 400, fontSize: '16px', letterSpacing: '0.15px' },
   body2: { fontWeight: 400, fontSize: '14px', letterSpacing: '0.17px' },
+  body3: { fontWeight: 400, fontSize: '12px', letterSpacing: '0.4px' },
   button: { fontWeight: 600, textTransform: 'none', letterSpacing: '0.01em' }
 };
 
@@ -77,6 +78,9 @@ const commonComponents: ThemeOptions['components'] = {
         }
       },
       contained: {
+        '&.MuiButton-containedSecondary': {
+          color: '#FFFFFF'
+        },
         '&.Mui-disabled': {
           backgroundColor: '#8F6D5F',
           color: '#FFFFFF',
@@ -163,7 +167,7 @@ export const buildTheme = (mode: PaletteMode) =>
       ...brandPalette,
       background:
         mode === 'light'
-          ? { default: '#F5F3EF', paper: '#FFFFFF' }
+          ? { default: '#E7E8EB', paper: '#FFFFFF' }
           : { default: '#1E1F21', paper: '#FFFFFF' },
       text:
         mode === 'light'
