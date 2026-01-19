@@ -167,7 +167,7 @@ export const buildTheme = (mode: PaletteMode) =>
       ...brandPalette,
       background:
         mode === 'light'
-          ? { default: '#F5F3EF', paper: '#FFFFFF' }
+          ? { default: '#E7E8EB', paper: '#FFFFFF' }
           : { default: '#1E1F21', paper: '#FFFFFF' },
       text:
         mode === 'light'
