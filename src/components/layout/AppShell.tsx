@@ -191,7 +191,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
         {drawerContent}
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 3, md: 4 }, mt: 8, mb: 8, width: '100%' }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, py: { xs: 3, md: 4 }, px: 0, mt: 8, mb: 8, width: '100%' }}
+      >
         {children}
       </Box>
 
