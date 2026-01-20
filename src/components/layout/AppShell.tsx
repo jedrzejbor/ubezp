@@ -5,6 +5,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  CircularProgress,
   Divider,
   Drawer,
   IconButton,
@@ -20,11 +21,13 @@ import {
   useTheme
 } from '@mui/material';
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from '@/components/BrandLogo';
 import { MobileNavigation } from '@/components/navigation/MobileNavigation';
 import { useColorMode } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
+import { useUiStore } from '@/store/uiStore';
+import { logout } from '@/services/authService';
 
 const drawerWidth = 260;
 
@@ -38,18 +41,54 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [accountDrawerOpen, setAccountDrawerOpen] = React.useState(false);
+  const [loggingOut, setLoggingOut] = React.useState(false);
   const { toggleColorMode, mode } = useColorMode();
   const { user, resetAuth } = useAuthStore();
+  const { addToast } = useUiStore();
 
   const toggleDrawer = () => setOpen((prev) => !prev);
   const toggleAccountDrawer = () => setAccountDrawerOpen((prev) => !prev);
 
-  const handleLogout = () => {
-    resetAuth();
-    setAccountDrawerOpen(false);
-    onLogout?.();
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      // Wywołaj endpoint /api/logout z Bearer tokenem
+      await logout();
+
+      // Wyczyść lokalny stan
+      resetAuth();
+      setAccountDrawerOpen(false);
+
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Wylogowano pomyślnie',
+        severity: 'success'
+      });
+
+      // Przekieruj do strony logowania
+      navigate('/login', { replace: true });
+      onLogout?.();
+    } catch (error) {
+      // Nawet przy błędzie API, wyczyść lokalny token
+      resetAuth();
+      setAccountDrawerOpen(false);
+
+      const message = error instanceof Error ? error.message : 'Błąd wylogowania';
+      addToast({
+        id: crypto.randomUUID(),
+        message,
+        severity: 'warning'
+      });
+
+      // Przekieruj do logowania mimo błędu
+      navigate('/login', { replace: true });
+      onLogout?.();
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   const drawerContent = (
@@ -138,8 +177,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
                 </IconButton>
               </Tooltip>
               <Tooltip title="Wyloguj">
-                <IconButton color="primary" onClick={handleLogout}>
-                  <LogoutRoundedIcon />
+                <IconButton color="primary" onClick={handleLogout} disabled={loggingOut}>
+                  {loggingOut ? <CircularProgress size={20} /> : <LogoutRoundedIcon />}
                 </IconButton>
               </Tooltip>
             </>
@@ -191,7 +230,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
         {drawerContent}
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 3, md: 4 }, mt: 8, mb: 8, width: '100%' }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, py: { xs: 3, md: 4 }, px: 0, mt: 8, mb: 8, width: '100%' }}
+      >
         {children}
       </Box>
 
@@ -240,15 +282,16 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
 
             <ListItemButton
               onClick={handleLogout}
+              disabled={loggingOut}
               sx={{
                 borderRadius: 2,
                 '&:hover': { bgcolor: 'action.hover' }
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
-                <LogoutRoundedIcon />
+                {loggingOut ? <CircularProgress size={20} /> : <LogoutRoundedIcon />}
               </ListItemIcon>
-              <ListItemText primary="Wyloguj" />
+              <ListItemText primary={loggingOut ? 'Wylogowywanie...' : 'Wyloguj'} />
             </ListItemButton>
           </Stack>
         </Drawer>

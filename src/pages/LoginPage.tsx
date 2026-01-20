@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Fade } from '@mui/material';
-import { useLocation, useNavigate, type Location } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from '@/components/forms/LoginForm';
 import ForgotPasswordForm from '@/components/forms/ForgotPasswordForm';
 import ResetPasswordPlaceholder from '@/components/forms/ResetPasswordPlaceholder';
@@ -14,18 +14,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialStage = 'login' }) 
   const [stage, setStage] = useState<'login' | 'forgot' | 'reset'>(initialStage);
   const { mode } = useColorMode();
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     setStage(initialStage);
   }, [initialStage]);
 
-  const from = (location.state as { from?: Location })?.from?.pathname || '/app';
-
-  const handleLoginSuccess = () => setStage('login');
-  const handleLoginRedirect = () => {
-    handleLoginSuccess();
-    navigate(from, { replace: true });
+  // Po udanym logowaniu (krok 1) przekieruj do strony 2FA
+  const handleLoginSuccess = () => {
+    navigate('/verify', { replace: true });
   };
 
   return (
@@ -33,7 +29,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialStage = 'login' }) 
       <div>
         {stage === 'login' && (
           <LoginForm
-            onSuccess={handleLoginRedirect}
+            onSuccess={handleLoginSuccess}
             onForgotPassword={() => setStage('forgot')}
             onBecomeClient={() => window.open('#', '_blank')}
           />

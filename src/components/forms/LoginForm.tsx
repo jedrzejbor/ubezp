@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginFormValues } from '@/utils/formSchemas';
-import { mockLogin } from '@/services/authService';
+import { login } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { useUiStore } from '@/store/uiStore';
 
@@ -36,7 +36,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     formState: { errors }
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
-  const { setToken, setUser, setLoading, loading, setError, clearError } = useAuthStore();
+  const { setLoading, loading, setError, clearError, setPendingAuth } = useAuthStore();
   const { addToast } = useUiStore();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -45,10 +45,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setLoading(true);
     clearError();
     try {
-      const response = await mockLogin(data.email, data.password);
-      setToken(response.token);
-      setUser(response.user);
-      addToast({ id: crypto.randomUUID(), message: 'Zalogowano pomyślnie', severity: 'success' });
+      // Wywołaj endpoint logowania
+      await login({ email: data.email, password: data.password });
+
+      // Zapisz dane do użycia w kroku 2FA
+      setPendingAuth({ email: data.email, password: data.password });
+
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Kod autoryzacyjny został wysłany',
+        severity: 'success'
+      });
+
+      // Przekieruj do strony 2FA
       onSuccess?.();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Nieznany błąd';

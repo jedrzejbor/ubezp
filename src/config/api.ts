@@ -1,0 +1,18 @@
+/**
+ * Konfiguracja API - pobiera bazowy URL z zmiennych środowiskowych
+ */
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost';
+
+export const API_ENDPOINTS = {
+  LOGIN: '/api/login',
+  LOGOUT: '/api/logout'
+  // Tutaj dodawaj kolejne endpointy
+} as const;
+
+/**
+ * Pobiera pełny URL endpointu
+ */
+export const getApiUrl = (endpoint: string): string => {
+  return `${API_BASE_URL}${endpoint}`;
+};
