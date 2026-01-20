@@ -9,8 +9,11 @@ import {
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
-import { useState, useRef, KeyboardEvent, ClipboardEvent } from 'react';
+import { useState, useRef, KeyboardEvent, ClipboardEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUiStore } from '@/store/uiStore';
+import { useAuthStore } from '@/store/authStore';
+import { verifyTwoFactor } from '@/services/authService';
 
 export interface TwoFactorAuthFormProps {
   email?: string;
@@ -19,15 +22,27 @@ export interface TwoFactorAuthFormProps {
 }
 
 export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
-  email = 'test@test.com',
+  email: propEmail,
   onSuccess,
   onResend
 }) => {
-  const [code, setCode] = useState<string[]>(['', '', '', '']);
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const theme = useTheme();
+  const navigate = useNavigate();
   const { addToast } = useUiStore();
+  const { pendingAuth, clearPendingAuth, setToken, setUser, token } = useAuthStore();
+
+  // Użyj emaila z pendingAuth lub z props
+  const email = propEmail || pendingAuth?.email || 'brak danych';
+
+  // Jeśli użytkownik jest już zalogowany, przekieruj do aplikacji
+  useEffect(() => {
+    if (token) {
+      navigate('/app', { replace: true });
+    }
+  }, [token, navigate]);
 
   const handleChange = (index: number, value: string) => {
     // Allow only digits
@@ -38,7 +53,7 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
     setCode(newCode);
 
     // Auto-focus next input
-    if (value && index < 3) {
+    if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -51,17 +66,17 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
 
   const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
     const newCode = [...code];
 
     pastedData.split('').forEach((char, i) => {
-      if (i < 4) newCode[i] = char;
+      if (i < 6) newCode[i] = char;
     });
 
     setCode(newCode);
 
     // Focus last filled input or next empty
-    const nextIndex = Math.min(pastedData.length, 3);
+    const nextIndex = Math.min(pastedData.length, 5);
     inputRefs.current[nextIndex]?.focus();
   };
 
@@ -69,36 +84,55 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
     e.preventDefault();
 
     const fullCode = code.join('');
-    if (fullCode.length !== 4) {
+    if (fullCode.length !== 6) {
       addToast({
         id: crypto.randomUUID(),
-        message: 'Wprowadź pełny 4-cyfrowy kod',
+        message: 'Wprowadź pełny 6-cyfrowy kod',
         severity: 'warning'
       });
+      return;
+    }
+
+    if (!pendingAuth) {
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Brak danych logowania. Zaloguj się ponownie.',
+        severity: 'error'
+      });
+      navigate('/login', { replace: true });
       return;
     }
 
     setLoading(true);
 
     try {
-      // Mock verification - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      // Wywołaj endpoint 2FA z pełnymi danymi
+      const response = await verifyTwoFactor({
+        email: pendingAuth.email,
+        password: pendingAuth.password,
+        token: fullCode
+      });
 
-      // Simulate random failure (12% chance like in login)
-      if (Math.random() < 0.12) {
-        throw new Error('Nieprawidłowy kod autoryzacji');
-      }
+      // Wyczyść dane tymczasowe PRZED zapisaniem tokenu
+      clearPendingAuth();
+
+      // Zapisz token i dane użytkownika - to wywoła useEffect który przekieruje
+      setToken(response.token);
+      setUser(response.user);
 
       addToast({
         id: crypto.randomUUID(),
-        message: 'Autoryzacja pomyślna',
+        message: 'Zalogowano pomyślnie',
         severity: 'success'
       });
+
+      // Bezpośrednia nawigacja jako backup
+      navigate('/app', { replace: true });
       onSuccess?.();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Nieznany błąd';
       addToast({ id: crypto.randomUUID(), message, severity: 'error' });
-      setCode(['', '', '', '']);
+      setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
@@ -106,9 +140,22 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
   };
 
   const handleResend = async () => {
+    if (!pendingAuth) {
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Brak danych logowania. Zaloguj się ponownie.',
+        severity: 'error'
+      });
+      navigate('/login', { replace: true });
+      return;
+    }
+
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Ponownie wywołaj endpoint logowania aby wysłać nowy kod
+      const { login } = await import('@/services/authService');
+      await login({ email: pendingAuth.email, password: pendingAuth.password });
+
       addToast({
         id: crypto.randomUUID(),
         message: 'Kod wysłany ponownie',
@@ -116,10 +163,10 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
       });
       onResend?.();
     } catch (error) {
-      console.log(error);
+      const message = error instanceof Error ? error.message : 'Nie udało się wysłać kodu';
       addToast({
         id: crypto.randomUUID(),
-        message: 'Nie udało się wysłać kodu',
+        message,
         severity: 'error'
       });
     } finally {
@@ -216,7 +263,7 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
         variant="contained"
         fullWidth
         size="large"
-        disabled={loading || code.join('').length !== 4}
+        disabled={loading || code.join('').length !== 6}
         startIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
         sx={{ height: 40, py: '8px', px: '22px', mb: 2 }}
       >
