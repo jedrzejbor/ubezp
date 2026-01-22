@@ -143,6 +143,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ sections, onColl
                     </ListItemIcon>
                     {!collapsed && (
                       <ListItemText
+                        sx={{ my: 0 }}
                         primary={item.label}
                         primaryTypographyProps={{
                           sx: {
@@ -192,6 +193,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ sections, onColl
             </ListItemIcon>
             {!collapsed && (
               <ListItemText
+                sx={{ my: 0 }}
                 primary="Zwiń menu"
                 primaryTypographyProps={{
                   sx: {
