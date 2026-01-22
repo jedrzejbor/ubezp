@@ -172,7 +172,11 @@ const AppLayout = () => {
       userMenuOptions={userMenuOptions}
       onLogout={handleLogout}
     >
-      <Container maxWidth="lg">
+      <Container
+        disableGutters
+        maxWidth={false}
+        sx={{ maxWidth: '100%', px: 0, pr: 3, height: '100%' }}
+      >
         <Outlet />
       </Container>
     </AppShell>
