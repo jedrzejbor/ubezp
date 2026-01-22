@@ -1,20 +1,33 @@
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import { Box, Button, Card, CardContent, Chip, Stack, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Switch,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
 import PageTitle from '@/components/PageTitle';
 import { useAuthStore } from '@/store/authStore';
 
 const SettingsPage = () => {
   const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const user = useAuthStore((state) => state.user);
 
   // Mock user data for display (replace with real data from your auth store or API)
   const userData = {
-    firstName: user?.name?.split(' ')[0] || 'Joanna',
-    lastName: user?.name?.split(' ')[1] || 'Kowalska',
-    position: 'Super Admin CB',
+    firstName: user?.firstname || user?.name?.split(' ')[0] || 'Joanna',
+    lastName: user?.lastname || user?.name?.split(' ')[1] || 'Kowalska',
+    position: user?.position || 'Super Admin Cliffside Brokers',
     status: 'Aktywny',
     phone: '+48 123 123 123',
-    email: user?.email || 'joannakowalska@cliffsiderokers.com'
+    email: user?.email || 'joannakowalska@cliffsidebrokers.com',
+    lastPasswordChange: '2.11.2025'
   };
 
   const handleEdit = () => {
@@ -27,16 +40,44 @@ const SettingsPage = () => {
     console.log('Change password');
   };
 
+  // Reusable field component for desktop grid
+  const FieldItem = ({
+    label,
+    value,
+    children
+  }: {
+    label: string;
+    value?: string;
+    children?: React.ReactNode;
+  }) => (
+    <Box sx={{ flex: 1, p: 1.5 }}>
+      <Typography
+        variant="body2"
+        sx={{ color: '#74767F', mb: 0.5, fontSize: '14px', lineHeight: 1.43 }}
+      >
+        {label}
+      </Typography>
+      {children || (
+        <Typography
+          variant="body2"
+          sx={{ color: '#32343A', fontWeight: 500, fontSize: '14px', lineHeight: 1.57 }}
+        >
+          {value}
+        </Typography>
+      )}
+    </Box>
+  );
+
   return (
     <Stack
-      spacing={2}
+      spacing={3}
       sx={{
-        maxWidth: 800,
+        maxWidth: isMdUp ? '100%' : 800,
         mx: 'auto',
         backgroundColor: theme.palette.background.paper,
         borderRadius: 2,
-        py: 2,
-        px: 1
+        py: 3,
+        px: isMdUp ? 3 : 1
       }}
     >
       {/* Page Title */}
@@ -46,166 +87,374 @@ const SettingsPage = () => {
       <Card
         sx={{
           borderRadius: 1,
-          boxShadow: '0px 2px 8px rgba(0,0,0,0.08)'
+          boxShadow: 'none',
+          border: '1px solid',
+          borderColor: 'rgba(143, 109, 95, 0.12)'
         }}
       >
-        <CardContent
-          sx={{
-            p: 2,
-            border: '1px solid',
-            borderColor: theme.palette.divider,
-            borderRadius: 1
-          }}
-        >
-          <Typography
-            variant="body1"
+        <CardContent sx={{ p: 2 }}>
+          {/* Header with title and button (button only on desktop) */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
             sx={{
-              fontWeight: 600,
-              mb: 3,
-              height: '67px',
-              backgroundColor: '#FBF9F9',
-              display: 'flex',
-              alignItems: 'center',
-              px: 2
+              borderBottom: '1px solid',
+              borderColor: 'rgba(143, 109, 95, 0.3)',
+              pb: 1,
+              px: 1.5,
+              mb: 1,
+              ...(!isMdUp && {
+                backgroundColor: '#F5F5F5',
+                borderRadius: 1,
+                border: 'none',
+                px: 2,
+                pt: 1
+              })
             }}
           >
-            Dane konta:
-          </Typography>
-
-          <Stack spacing={2.5} sx={{ px: 1.5 }}>
-            {/* First Name */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                Imię
-              </Typography>
-              <Typography variant="body3">{userData.firstName}</Typography>
-            </Stack>
-
-            {/* Last Name */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                Nazwisko
-              </Typography>
-              <Typography variant="body3">{userData.lastName}</Typography>
-            </Stack>
-
-            {/* Position */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                Stanowisko
-              </Typography>
-              <Typography variant="body3">{userData.position}</Typography>
-            </Stack>
-
-            {/* Status */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                Status
-              </Typography>
-              <Chip
-                label={userData.status}
-                size="small"
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 600,
+                color: '#1E1F21',
+                fontSize: '16px',
+                lineHeight: 1.75
+              }}
+            >
+              Dane konta:
+            </Typography>
+            {isMdUp && (
+              <Button
+                variant="contained"
+                startIcon={<EditOutlinedIcon />}
+                onClick={handleEdit}
                 sx={{
-                  bgcolor: '#E8F5E9',
-                  color: '#2E7D32',
-                  fontWeight: 400,
-                  fontSize: '12px',
-                  padding: '3px 8px',
-                  '& .MuiChip-icon': { mr: '6px', ml: 0 },
-                  '& .MuiChip-label': { px: 0 }
+                  bgcolor: '#1E1F21',
+                  color: '#FFFFFF',
+                  borderRadius: 1,
+                  px: 2,
+                  '&:hover': { bgcolor: '#32343A' }
                 }}
-                icon={
-                  <Box
-                    component="span"
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: '#4CAF50'
-                    }}
-                  />
-                }
-              />
-            </Stack>
-
-            {/* Phone */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                Telefon
-              </Typography>
-              <Typography variant="body3">{userData.phone}</Typography>
-            </Stack>
-
-            {/* Email */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
-                E-mail
-              </Typography>
-              <Typography variant="body3">{userData.email}</Typography>
-            </Stack>
+              >
+                Edytuj
+              </Button>
+            )}
           </Stack>
 
-          {/* Edit Button */}
-          <Box sx={{ mt: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<EditOutlinedIcon />}
-              onClick={handleEdit}
-              sx={{ borderRadius: 1 }}
-            >
-              Edytuj
-            </Button>
-          </Box>
+          {/* Desktop: Grid layout, Mobile: Stack layout */}
+          {isMdUp ? (
+            // Desktop layout - horizontal grid
+            <Box sx={{ px: 1.5 }}>
+              {/* First row: Imię, Nazwisko, Stanowisko, Status */}
+              <Stack direction="row" sx={{ mb: 1 }}>
+                <FieldItem label="Imię" value={userData.firstName} />
+                <FieldItem label="Nazwisko" value={userData.lastName} />
+                <FieldItem label="Stanowisko" value={userData.position} />
+                <FieldItem label="Status">
+                  <Chip
+                    label={userData.status}
+                    size="small"
+                    sx={{
+                      bgcolor: '#E8F5E9',
+                      color: '#2E7D32',
+                      fontWeight: 400,
+                      fontSize: '12px',
+                      height: '20px',
+                      padding: '3px 8px',
+                      '& .MuiChip-icon': { mr: '6px', ml: 0 },
+                      '& .MuiChip-label': { px: 0 }
+                    }}
+                    icon={
+                      <Box
+                        component="span"
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          bgcolor: '#4CAF50',
+                          ml: 1
+                        }}
+                      />
+                    }
+                  />
+                </FieldItem>
+              </Stack>
+              {/* Second row: Telefon, E-mail */}
+              <Stack direction="row">
+                <FieldItem label="Telefon" value={userData.phone} />
+                <FieldItem label="E-mail" value={userData.email} />
+                <Box sx={{ flex: 1, p: 1.5 }} />
+                <Box sx={{ flex: 1, p: 1.5 }} />
+              </Stack>
+            </Box>
+          ) : (
+            // Mobile layout - vertical stack
+            <Stack spacing={2.5} sx={{ px: 1.5 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  Imię
+                </Typography>
+                <Typography variant="body3">{userData.firstName}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  Nazwisko
+                </Typography>
+                <Typography variant="body3">{userData.lastName}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  Stanowisko
+                </Typography>
+                <Typography variant="body3">{userData.position}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  Status
+                </Typography>
+                <Chip
+                  label={userData.status}
+                  size="small"
+                  sx={{
+                    bgcolor: '#E8F5E9',
+                    color: '#2E7D32',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    padding: '3px 8px',
+                    '& .MuiChip-icon': { mr: '6px', ml: 0 },
+                    '& .MuiChip-label': { px: 0 }
+                  }}
+                  icon={
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: '#4CAF50'
+                      }}
+                    />
+                  }
+                />
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  Telefon
+                </Typography>
+                <Typography variant="body3">{userData.phone}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+                  E-mail
+                </Typography>
+                <Typography variant="body3">{userData.email}</Typography>
+              </Stack>
+              {/* Mobile: Edit button at bottom */}
+              <Box sx={{ mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditOutlinedIcon />}
+                  onClick={handleEdit}
+                  sx={{ borderRadius: 1 }}
+                >
+                  Edytuj
+                </Button>
+              </Box>
+            </Stack>
+          )}
         </CardContent>
       </Card>
 
       {/* Password Settings Section */}
       <Card
         sx={{
-          borderRadius: 2,
-          boxShadow: '0px 2px 8px rgba(0,0,0,0.08)',
+          borderRadius: 1,
+          boxShadow: 'none',
           border: '1px solid',
-          borderColor: theme.palette.divider
+          borderColor: 'rgba(143, 109, 95, 0.12)'
         }}
       >
-        <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="body1"
+        <CardContent sx={{ p: 2 }}>
+          {/* Header with title and button (button only on desktop) */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
             sx={{
-              fontWeight: 600,
-              mb: 3,
-              height: '67px',
-              backgroundColor: 'rgba(143, 109, 95, 0.04)',
-              display: 'flex',
-              alignItems: 'center',
-              px: 2
+              borderBottom: '1px solid',
+              borderColor: 'rgba(143, 109, 95, 0.3)',
+              pb: 1,
+              px: 1.5,
+              mb: 1,
+              ...(!isMdUp && {
+                backgroundColor: '#F5F5F5',
+                borderRadius: 1,
+                border: 'none',
+                px: 2,
+                pt: 1
+              })
             }}
           >
-            Ustawienia hasła:
-          </Typography>
-
-          <Stack spacing={2.5} sx={{ px: 1.5 }}>
-            {/* Password (masked) */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                Hasło
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500, letterSpacing: 2 }}>
-                ***********
-              </Typography>
-            </Stack>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 600,
+                color: '#1E1F21',
+                fontSize: '16px',
+                lineHeight: 1.75
+              }}
+            >
+              Ustawienia hasła :
+            </Typography>
+            {isMdUp && (
+              <Button
+                variant="contained"
+                startIcon={<EditOutlinedIcon />}
+                onClick={handleChangePassword}
+                sx={{
+                  bgcolor: '#1E1F21',
+                  color: '#FFFFFF',
+                  borderRadius: 1,
+                  px: 2,
+                  '&:hover': { bgcolor: '#32343A' }
+                }}
+              >
+                Zmiana hasła
+              </Button>
+            )}
           </Stack>
 
-          {/* Change Password Button */}
-          <Box sx={{ mt: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<EditOutlinedIcon />}
-              onClick={handleChangePassword}
-              sx={{ borderRadius: 1 }}
+          {/* Desktop: horizontal layout, Mobile: vertical */}
+          {isMdUp ? (
+            <Stack direction="row" sx={{ px: 1.5, py: 1 }}>
+              <Box sx={{ width: 305 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#74767F', mb: 1, fontSize: '14px', lineHeight: 1.43 }}
+                >
+                  Hasło
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#32343A', fontWeight: 500, fontSize: '14px', letterSpacing: 2 }}
+                >
+                  ***********
+                </Typography>
+              </Box>
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#74767F', mb: 1, fontSize: '14px', lineHeight: 1.43 }}
+                >
+                  Ostatnia zmiana hasła
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#32343A', fontWeight: 500, fontSize: '14px' }}
+                >
+                  {userData.lastPasswordChange}
+                </Typography>
+              </Box>
+            </Stack>
+          ) : (
+            <Stack spacing={2.5} sx={{ px: 1.5 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  Hasło
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500, letterSpacing: 2 }}>
+                  ***********
+                </Typography>
+              </Stack>
+              {/* Mobile: Change password button at bottom */}
+              <Box sx={{ mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditOutlinedIcon />}
+                  onClick={handleChangePassword}
+                  sx={{ borderRadius: 1 }}
+                >
+                  Zmiana hasła
+                </Button>
+              </Box>
+            </Stack>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Push Notifications Section */}
+      <Card
+        sx={{
+          borderRadius: 1,
+          boxShadow: 'none',
+          border: '1px solid',
+          borderColor: 'rgba(143, 109, 95, 0.12)'
+        }}
+      >
+        <CardContent sx={{ p: 2 }}>
+          {/* Header */}
+          <Box
+            sx={{
+              borderBottom: '1px solid',
+              borderColor: 'rgba(143, 109, 95, 0.3)',
+              pb: 1,
+              px: 1.5,
+              mb: 1,
+              ...(!isMdUp && {
+                backgroundColor: '#F5F5F5',
+                borderRadius: 1,
+                border: 'none',
+                px: 2,
+                pt: 1
+              })
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 600,
+                color: '#1E1F21',
+                fontSize: '16px',
+                lineHeight: 1.75,
+                ...(isMdUp && {
+                  height: '55px',
+                  display: 'flex',
+                  alignItems: 'center'
+                })
+              }}
             >
-              Zmiana hasła
-            </Button>
+              Powiadomienia push:
+            </Typography>
+          </Box>
+
+          {/* Content */}
+          <Box sx={{ px: 1.5, py: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: '#74767F', mb: 1, fontSize: '14px', lineHeight: 1.43 }}
+            >
+              Powiadomienia e-mail
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Switch
+                defaultChecked
+                sx={{
+                  '& .MuiSwitch-switchBase.Mui-checked': {
+                    color: '#1E1F21'
+                  },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                    backgroundColor: '#1E1F21'
+                  }
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: '#32343A', fontWeight: 500, fontSize: '14px' }}
+              >
+                Włączone
+              </Typography>
+            </Stack>
           </Box>
         </CardContent>
       </Card>
