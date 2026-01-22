@@ -1,64 +1,88 @@
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
-import WbSunnyRoundedIcon from '@mui/icons-material/WbSunnyRounded';
+// import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
+// import WbSunnyRoundedIcon from '@mui/icons-material/WbSunnyRounded';
+// import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
   AppBar,
   Avatar,
   Box,
+  Breadcrumbs,
   CircularProgress,
   Divider,
   Drawer,
   IconButton,
-  List,
+  Link,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Stack,
   Toolbar,
-  Tooltip,
+  // Tooltip,
   Typography,
   useMediaQuery,
   useTheme
 } from '@mui/material';
 import React from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import BrandLogo from '@/components/BrandLogo';
+import { NavLink, useNavigate } from 'react-router-dom';
+import logoLight from '@/assets/logo-light.svg';
 import { MobileNavigation } from '@/components/navigation/MobileNavigation';
-import { useColorMode } from '@/theme';
+import { DesktopSidebar, MenuSection } from '@/components/navigation/DesktopSidebar';
+import { UserMenu, UserMenuOption } from '@/components/navigation/UserMenu';
+// import { useColorMode } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useUiStore } from '@/store/uiStore';
 import { logout } from '@/services/authService';
 
-const drawerWidth = 260;
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
 
 interface AppShellProps {
   children: React.ReactNode;
-  navItems: { label: string; icon: React.ReactNode; to: string }[];
+  navItems?: { label: string; icon: React.ReactNode; to: string }[];
+  menuSections?: MenuSection[];
+  breadcrumbs?: BreadcrumbItem[];
+  userMenuOptions?: UserMenuOption[];
   onLogout?: () => void;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout }) => {
+export const AppShell: React.FC<AppShellProps> = ({
+  children,
+  menuSections,
+  breadcrumbs,
+  userMenuOptions,
+  onLogout
+}) => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const location = useLocation();
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
   const [accountDrawerOpen, setAccountDrawerOpen] = React.useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [loggingOut, setLoggingOut] = React.useState(false);
-  const { toggleColorMode, mode } = useColorMode();
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+
+  const handleSidebarCollapsedChange = (collapsed: boolean) => {
+    setSidebarCollapsed(collapsed);
+  };
+  // const { toggleColorMode, mode } = useColorMode();
   const { user, resetAuth } = useAuthStore();
   const { addToast } = useUiStore();
 
-  const toggleDrawer = () => setOpen((prev) => !prev);
   const toggleAccountDrawer = () => setAccountDrawerOpen((prev) => !prev);
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
 
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      // Wywołaj endpoint /api/logout z Bearer tokenem
       await logout();
-
-      // Wyczyść lokalny stan
       resetAuth();
       setAccountDrawerOpen(false);
 
@@ -68,11 +92,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
         severity: 'success'
       });
 
-      // Przekieruj do strony logowania
       navigate('/login', { replace: true });
       onLogout?.();
     } catch (error) {
-      // Nawet przy błędzie API, wyczyść lokalny token
       resetAuth();
       setAccountDrawerOpen(false);
 
@@ -83,7 +105,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
         severity: 'warning'
       });
 
-      // Przekieruj do logowania mimo błędu
       navigate('/login', { replace: true });
       onLogout?.();
     } finally {
@@ -91,148 +112,197 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
     }
   };
 
-  const drawerContent = (
-    <Stack height="100%">
-      <Stack direction="row" alignItems="center" spacing={1.5} p={3}>
-        <BrandLogo size="sm" />
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ letterSpacing: '0.08em' }}>
-            Cliffside
-          </Typography>
-          <Typography variant="h6" sx={{ lineHeight: 1.1 }}>
-            Brokers
-          </Typography>
-        </Box>
-      </Stack>
-      <Divider />
-      <List sx={{ px: 1 }}>
-        {navItems.map((item) => {
-          const active = location.pathname.startsWith(item.to);
-          return (
-            <ListItemButton
-              key={item.label}
-              component={NavLink}
-              to={item.to}
-              selected={active}
-              onClick={() => {
-                if (!isMdUp) {
-                  setOpen(false);
-                }
-              }}
-              sx={{
-                borderRadius: 2,
-                '&.active': { bgcolor: 'action.selected' }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{ sx: { fontSize: '14px', fontWeight: 500 } }}
-              />
-            </ListItemButton>
-          );
-        })}
-      </List>
-      <Box flex={1} />
-      <Divider />
-      <Stack direction="row" alignItems="center" spacing={1.5} p={3}>
-        <Avatar
-          sx={{ bgcolor: 'secondary.main', color: 'secondary.contrastText', width: 42, height: 42 }}
-        >
-          {user?.name?.[0] ?? 'C'}
-        </Avatar>
-        <Box>
-          <Typography variant="subtitle1">{user?.name ?? 'Gość'}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {user?.email ?? 'brak danych'}
-          </Typography>
-        </Box>
-      </Stack>
-    </Stack>
-  );
+  const currentSidebarWidth = sidebarCollapsed ? 80 : 260;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Desktop Sidebar */}
+      {isMdUp && menuSections && (
+        <DesktopSidebar sections={menuSections} onCollapsedChange={handleSidebarCollapsedChange} />
+      )}
+
       <AppBar
         position="fixed"
         color="inherit"
         elevation={0}
         sx={{
-          borderBottom: '1px solid',
+          // borderBottom: '1px solid',
           borderColor: 'divider',
-          ml: isMdUp ? `${drawerWidth}px` : 0,
-          width: isMdUp ? `calc(100% - ${drawerWidth}px)` : '100%'
+          ml: isMdUp ? `${currentSidebarWidth + 40}px` : 0,
+          width: isMdUp ? `calc(100% - ${currentSidebarWidth + 40}px)` : '100%',
+          transition: 'all 0.3s ease'
         }}
       >
-        <Toolbar sx={{ display: 'flex', gap: 1.5, justifyContent: 'space-between' }}>
+        <Toolbar
+          sx={{
+            display: 'flex',
+            gap: 1.5,
+            justifyContent: 'space-between',
+            ...(isMdUp ? { backgroundColor: '#FFFFFF' } : { backgroundColor: 'transparent' }),
+            borderRadius: '8px',
+            ...(isMdUp ? { mt: 3, mr: 3 } : { mt: 0, mr: 0 })
+          }}
+        >
           {isMdUp ? (
             <>
-              {/* Desktop: hamburger removed, title and actions */}
-              <Typography variant="h6" sx={{ flex: 1 }}>
-                Panel klienta
-              </Typography>
-              <Tooltip title="Przełącz motyw">
-                <IconButton onClick={toggleColorMode} color="primary">
-                  {mode === 'light' ? <NightlightRoundRoundedIcon /> : <WbSunnyRoundedIcon />}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Wyloguj">
-                <IconButton color="primary" onClick={handleLogout} disabled={loggingOut}>
-                  {loggingOut ? <CircularProgress size={20} /> : <LogoutRoundedIcon />}
-                </IconButton>
-              </Tooltip>
+              {/* Desktop: breadcrumbs */}
+              {breadcrumbs && breadcrumbs.length > 0 ? (
+                <Breadcrumbs
+                  separator="/"
+                  sx={{
+                    flex: 1,
+                    '& .MuiBreadcrumbs-separator': {
+                      color: '#74767F',
+                      mx: 1
+                    }
+                  }}
+                >
+                  {breadcrumbs.map((crumb, index) => {
+                    const isLast = index === breadcrumbs.length - 1;
+                    return isLast ? (
+                      <Typography
+                        key={index}
+                        color="text.primary"
+                        sx={{ fontSize: '14px', letterSpacing: '0.17px' }}
+                      >
+                        {crumb.label}
+                      </Typography>
+                    ) : (
+                      <Link
+                        key={index}
+                        underline="hover"
+                        color="text.secondary"
+                        href={crumb.href || '#'}
+                        sx={{ fontSize: '14px', letterSpacing: '0.17px' }}
+                      >
+                        {crumb.label}
+                      </Link>
+                    );
+                  })}
+                </Breadcrumbs>
+              ) : (
+                <Box sx={{ flex: 1 }} />
+              )}
+
+              {/* Desktop: user menu */}
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Box
+                  onClick={handleUserMenuOpen}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      opacity: 0.8
+                    }
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: '#8F6D5F',
+                      width: 32,
+                      height: 32,
+                      fontSize: '14px',
+                      fontWeight: 400,
+                      borderRadius: '4px'
+                    }}
+                  >
+                    {user?.name?.[0] ?? 'C'}
+                  </Avatar>
+                  <Typography
+                    sx={{
+                      fontSize: '16px',
+                      fontWeight: 400,
+                      letterSpacing: '0.15px',
+                      color: '#32343A'
+                    }}
+                  >
+                    Witaj!
+                  </Typography>
+                </Box>
+
+                <UserMenu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={handleUserMenuClose}
+                  userName={user?.name}
+                  companyName="Cliffside Brokers"
+                  options={userMenuOptions || []}
+                  onLogout={handleLogout}
+                  loggingOut={loggingOut}
+                />
+              </Stack>
             </>
           ) : (
             <>
-              {/* Mobile: clickable logo + avatar */}
+              {/* Mobile: logo + bell + avatar */}
               <IconButton
                 component={NavLink}
                 to="/app/dashboard"
                 edge="start"
                 aria-label="Dashboard"
-                sx={{ p: 0.5 }}
+                sx={{ p: 0, ml: '24px', mt: '16px', mb: '8px' }}
               >
-                <BrandLogo size="sm" />
+                <Box
+                  component="img"
+                  src={logoLight}
+                  alt="Cliffside Brokers"
+                  sx={{ width: 72, height: 'auto', userSelect: 'none' }}
+                />
               </IconButton>
               <Box flex={1} />
-              <IconButton edge="end" onClick={toggleAccountDrawer} aria-label="Konto">
-                <Avatar
-                  sx={{
-                    bgcolor: 'secondary.main',
-                    color: 'secondary.contrastText',
-                    width: 40,
-                    height: 40
-                  }}
-                >
-                  {user?.name?.[0] ?? 'C'}
-                </Avatar>
-              </IconButton>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <IconButton aria-label="Powiadomienia" sx={{ p: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"
+                        fill="#1E1F21"
+                      />
+                    </svg>
+                  </Box>
+                </IconButton>
+                <IconButton onClick={toggleAccountDrawer} aria-label="Konto" sx={{ p: 0 }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: '#8F6D5F',
+                      width: 40,
+                      height: 40,
+                      fontSize: '14px',
+                      fontWeight: 400,
+                      borderRadius: '4px'
+                    }}
+                  >
+                    {user?.name?.[0] ?? 'C'}
+                  </Avatar>
+                </IconButton>
+              </Stack>
             </>
           )}
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant={isMdUp ? 'permanent' : 'temporary'}
-        open={isMdUp ? true : open}
-        onClose={toggleDrawer}
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            borderRight: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.paper'
-          }
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
       <Box
         component="main"
-        sx={{ flexGrow: 1, py: { xs: 3, md: 4 }, px: 0, mt: 8, mb: 8, width: '100%' }}
+        sx={{
+          flexGrow: 1,
+          py: { xs: 3, md: 4 },
+          px: 0,
+          mt: 8,
+          mb: 8,
+          ml: isMdUp ? `${currentSidebarWidth + 40}px` : 0,
+          width: isMdUp ? `calc(100% - ${currentSidebarWidth + 40}px)` : '100%',
+          transition: 'all 0.3s ease'
+        }}
       >
         {children}
       </Box>
@@ -247,7 +317,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children, navItems, onLogout
           open={accountDrawerOpen}
           onClose={toggleAccountDrawer}
           sx={{
-            // Ensure the Drawer root has higher stacking context so it appears above the main menu
             zIndex: (theme) => theme.zIndex.modal + 2000,
             '& .MuiDrawer-paper': {
               borderRadius: '16px 16px 0 0',
