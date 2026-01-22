@@ -297,8 +297,9 @@ export const AppShell: React.FC<AppShellProps> = ({
           flexGrow: 1,
           py: { xs: 3, md: 4 },
           px: 0,
+          pb: { xs: 3, md: 3 },
           mt: 8,
-          mb: 8,
+          mb: 0,
           ml: isMdUp ? `${currentSidebarWidth + 40}px` : 0,
           width: isMdUp ? `calc(100% - ${currentSidebarWidth + 40}px)` : '100%',
           transition: 'all 0.3s ease'
