@@ -77,7 +77,8 @@ const SettingsPage = () => {
         backgroundColor: theme.palette.background.paper,
         borderRadius: 2,
         py: 3,
-        px: isMdUp ? 3 : 1
+        px: isMdUp ? 3 : 1,
+        height: '100%'
       }}
     >
       {/* Page Title */}
