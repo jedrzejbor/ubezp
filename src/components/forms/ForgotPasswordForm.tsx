@@ -57,12 +57,13 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         onClick={onBackToLogin}
         sx={{
           alignSelf: 'flex-start',
-          mb: 3,
           color: '#1E1F21',
-          px: 1.5
+          px: 1.5,
+          mb: 4,
+          mt: -2
         }}
       >
-        Wróć do logowania
+        {isMobile ? 'Wróć' : 'Wróć do logowania'}
       </Button>
 
       <Stack spacing={3} alignItems="center">
