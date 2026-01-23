@@ -1,10 +1,10 @@
-import { Box, Container, IconButton, Paper, Stack, useTheme, Typography } from '@mui/material';
-import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
-import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import { Box, Container, Paper, Stack, useTheme, Typography } from '@mui/material';
+// import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
+// import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BrandLogo from '@/components/BrandLogo';
 import backgroundImage from '@/assets/background-image.svg';
-import { useColorMode } from '@/theme';
+// import { useColorMode } from '@/theme';
 import heroDesktop from '@/assets/hero-desktop.jpg';
 import { useLocation } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ interface AuthLayoutProps {
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
   const theme = useTheme();
-  const { toggleColorMode, mode } = useColorMode();
+  // const { toggleColorMode, mode } = useColorMode();
   const location = useLocation();
 
   const isLight = theme.palette.mode === 'light';
@@ -73,7 +73,11 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           >
             {/* Desktop: Logo at center top */}
             <Stack spacing={2} alignItems="center" sx={{ mb: 2, mt: 10 }}>
-              {location.pathname !== '/verify' && <BrandLogo size="md" />}
+              {location.pathname !== '/verify' &&
+                location.pathname !== '/reset-password' &&
+                location.pathname !== '/set-new-password' && (
+                  <BrandLogo size="md" variant="light" />
+                )}
             </Stack>
 
             {/* Form content - centered */}
@@ -196,24 +200,28 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         >
           {/* Logo at top - only on mobile */}
           <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
-            {location.pathname !== '/verify' && <BrandLogo size="lg" />}
+            {location.pathname !== '/verify' &&
+              location.pathname !== '/reset-password' &&
+              location.pathname !== '/set-new-password' && <BrandLogo size="lg" variant="light" />}
           </Stack>
 
           {/* Theme toggle - mobile */}
-          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
-            <IconButton
-              aria-label="Przełącz motyw"
-              onClick={toggleColorMode}
-              color="inherit"
-              sx={{
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.paper'
-              }}
-            >
-              {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
-            </IconButton>
-          </Stack>
+          {/* {location.pathname !== '/reset-password' && location.pathname !== '/set-new-password' && (
+            <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+              <IconButton
+                aria-label="Przełącz motyw"
+                onClick={toggleColorMode}
+                color="inherit"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.paper'
+                }}
+              >
+                {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
+              </IconButton>
+            </Stack>
+          )} */}
 
           {/* Form content - centered vertically */}
           <Stack
