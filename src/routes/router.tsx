@@ -38,6 +38,10 @@ export const router = createBrowserRouter([
         element: <LoginPage initialStage="forgot" />
       },
       {
+        path: '/set-new-password',
+        element: <LoginPage initialStage="reset" />
+      },
+      {
         path: '/verify',
         element: <TwoFactorAuthPage />
       }

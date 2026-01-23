@@ -1,0 +1,66 @@
+image: node:20
+
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: Install deps
+          caches:
+            - node
+          script:
+            - node -v
+            - npm -v
+
+            - npm ci
+
+          artifacts:
+            - node_modules/**
+            - package-lock.json
+
+      - parallel:
+          - step:
+              name: ESLint
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm run lint
+
+          - step:
+              name: TypeScript type check
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm run typecheck
+
+          - step:
+              name: Build
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm run build
+              artifacts:
+                - dist/**
+
+  branches:
+    main:
+      - step:
+          name: Deploy to staging
+          deployment: staging
+          script:
+            # Install SSH client
+            - apt-get update
+            - apt-get install -y openssh-client
+
+            # Prepare SSH key
+            - mkdir -p ~/.ssh
+            - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
+            - chmod 600 ~/.ssh/id_rsa
+
+            # SSH config (avoid host key prompts)
+            - printf "Host staging\n  HostName $SSH_HOST\n  User $SSH_USER\n  Port ${SSH_PORT:-22}\n  StrictHostKeyChecking no\n" > ~/.ssh/config
+
+            # Deploy: restart docker-compose stack
+            - ssh staging "cd $APP_PATH && export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH && git pull && docker compose -f docker-compose.stage.yml build nginx && docker compose -f docker-compose.stage.yml down && docker compose -f docker-compose.stage.yml up -d"

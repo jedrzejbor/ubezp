@@ -1,9 +1,10 @@
 import { Box, useTheme } from '@mui/material';
 import logoDark from '@/assets/logo-dark.svg';
-// import logoLight from '@/assets/logo-light.svg';
+import logoLight from '@/assets/logo-light.svg';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'light' | 'auto';
 }
 
 const sizeMap = {
@@ -12,11 +13,12 @@ const sizeMap = {
   lg: 120
 };
 
-export const BrandLogo: React.FC<BrandLogoProps> = ({ size = 'md' }) => {
+export const BrandLogo: React.FC<BrandLogoProps> = ({ size = 'md', variant = 'auto' }) => {
   const theme = useTheme();
   const dimension = sizeMap[size];
 
-  const src = theme.palette.mode === 'light' ? logoDark : logoDark;
+  const src =
+    variant === 'light' ? logoLight : theme.palette.mode === 'light' ? logoDark : logoDark;
 
   return (
     <Box

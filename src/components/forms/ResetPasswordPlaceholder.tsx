@@ -1,90 +1,224 @@
-import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material';
+import LockOpenRoundedIcon from '@mui/icons-material/LockOpenRounded';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { resetPasswordSchema, type ResetPasswordFormValues } from '@/utils/formSchemas';
+import { z } from 'zod';
 import { mockCompletePasswordReset } from '@/services/authService';
 import { useUiStore } from '@/store/uiStore';
 
+// Nowy schema tylko dla nowego hasła (bez kodu - kod jest w URL)
+const setNewPasswordSchema = z
+  .object({
+    password: z.string().min(8, 'Hasło musi mieć co najmniej 8 znaków'),
+    confirmPassword: z.string().min(1, 'Potwierdź nowe hasło')
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Hasła muszą się zgadzać'
+  });
+
+type SetNewPasswordFormValues = z.infer<typeof setNewPasswordSchema>;
+
 interface ResetPasswordPlaceholderProps {
   onBack?: () => void;
+  onSuccess?: () => void;
 }
 
-export const ResetPasswordPlaceholder: React.FC<ResetPasswordPlaceholderProps> = ({ onBack }) => {
+export const ResetPasswordPlaceholder: React.FC<ResetPasswordPlaceholderProps> = ({
+  onBack,
+  onSuccess
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     handleSubmit,
     register,
     formState: { errors, isSubmitting }
-  } = useForm<ResetPasswordFormValues>({ resolver: zodResolver(resetPasswordSchema) });
+  } = useForm<SetNewPasswordFormValues>({ resolver: zodResolver(setNewPasswordSchema) });
 
   const { addToast } = useUiStore();
 
-  const onSubmit = async (data: ResetPasswordFormValues) => {
+  const onSubmit = async (data: SetNewPasswordFormValues) => {
     try {
-      const res = await mockCompletePasswordReset(data.code);
-      addToast({ id: crypto.randomUUID(), message: res.message, severity: 'success' });
+      // Symulujemy reset hasła (w przyszłości tutaj będzie API call z tokenem z URL)
+      console.log(data);
+      await mockCompletePasswordReset('mock-token');
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Hasło zostało zmienione',
+        severity: 'success'
+      });
+      onSuccess?.();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Nieznany błąd';
       addToast({ id: crypto.randomUUID(), message, severity: 'error' });
     }
   };
 
+  const passwordHelperText =
+    'Stwórz długie hasło (min. 8 znaków) z różnorodnymi elementami, takimi jak litery (zarówno wielkie, jak i małe), cyfry i znaki specjalne, unikając informacji osobistych.';
+
   return (
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      display="flex"
-      flexDirection="column"
-      gap={2.5}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        maxWidth: isMobile ? 343 : 420,
+        mx: 'auto'
+      }}
     >
-      <Stack spacing={0.5}>
-        <Typography variant="h3" component="h1">
-          Ustaw nowe hasło
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          W przyszłości ten krok zostanie zastąpiony integracją z backendem i ustawieniem nowego
-          hasła.
-        </Typography>
-      </Stack>
+      {/* Back button */}
+      <Button
+        variant="text"
+        startIcon={<ArrowBackIcon />}
+        onClick={onBack}
+        sx={{
+          alignSelf: 'flex-start',
+          color: '#1E1F21',
+          px: 1.5,
+          mb: 4,
+          mt: -2
+        }}
+      >
+        {isMobile ? 'Wróć' : 'Wróć do logowania'}
+      </Button>
 
-      <Stack spacing={2}>
-        <TextField
-          label="Kod resetujący"
-          autoComplete="one-time-code"
-          error={Boolean(errors.code)}
-          helperText={errors.code?.message}
-          {...register('code')}
-        />
+      <Stack spacing={3} alignItems="center">
+        {/* Icon */}
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            bgcolor: 'rgba(143, 109, 95, 0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <LockOpenRoundedIcon sx={{ fontSize: 36, color: '#8F6D5F' }} />
+        </Box>
 
-        <TextField
-          label="Nowe hasło"
-          type="password"
-          autoComplete="new-password"
-          error={Boolean(errors.password)}
-          helperText={errors.password?.message}
-          {...register('password')}
-        />
+        {/* Title & Description */}
+        <Stack spacing={1} textAlign="center" sx={{ width: '100%', maxWidth: 311 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 300,
+              fontSize: '24px',
+              lineHeight: 1.334,
+              color: '#32343A'
+            }}
+          >
+            Ustaw nowe hasło
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: '14px',
+              lineHeight: 1.43,
+              letterSpacing: '0.17px',
+              color: 'rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            {passwordHelperText}
+          </Typography>
+        </Stack>
 
-        <TextField
-          label="Potwierdź hasło"
-          type="password"
-          autoComplete="new-password"
-          error={Boolean(errors.confirmPassword)}
-          helperText={errors.confirmPassword?.message}
-          {...register('confirmPassword')}
-        />
-      </Stack>
+        {/* Form fields */}
+        <Stack spacing={2.5} sx={{ width: '100%', mt: 2 }}>
+          <TextField
+            label="Nowe hasło"
+            type={showNewPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            error={Boolean(errors.password)}
+            helperText={errors.password?.message}
+            {...register('password')}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showNewPassword ? (
+                      <VisibilityOffRoundedIcon sx={{ color: '#74767F' }} />
+                    ) : (
+                      <VisibilityRoundedIcon sx={{ color: '#74767F' }} />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
 
-      <Alert severity="warning" variant="outlined" sx={{ borderRadius: 2, borderColor: 'divider' }}>
-        Placeholder dla etapu ustawiania hasła — docelowo zostanie podpięty backend.
-      </Alert>
+          <TextField
+            label="Powtórz nowe hasło"
+            type={showConfirmPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            error={Boolean(errors.confirmPassword)}
+            helperText={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showConfirmPassword ? (
+                      <VisibilityOffRoundedIcon sx={{ color: '#74767F' }} />
+                    ) : (
+                      <VisibilityRoundedIcon sx={{ color: '#74767F' }} />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
 
-      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-        <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
-          Zapisz nowe hasło
-        </Button>
-        <Button variant="outlined" onClick={onBack} fullWidth>
-          Wróć
-        </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={isSubmitting}
+            sx={{
+              bgcolor: '#1E1F21',
+              color: '#FFFFFF',
+              py: 1.25,
+              fontSize: '14px',
+              fontWeight: 500,
+              '&:hover': { bgcolor: '#32343A' }
+            }}
+          >
+            Zapisz
+          </Button>
+        </Stack>
       </Stack>
     </Box>
   );

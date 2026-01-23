@@ -1,0 +1,32 @@
+services:
+  nginx:
+    container_name: '${COMPOSE_PROJECT_NAME}-nginx'
+    build:
+      context: .
+      dockerfile: ./.docker/nginx/Dockerfile.stage
+      args:
+        NGINX_CONF: nginx.conf
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.frontend-cfb.entrypoints=web'
+      - 'traefik.http.routers.frontend-cfb.rule=Host(`cfb.letstest.pl`)'
+      - 'traefik.http.middlewares.frontend-cfb-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.middlewares.frontend-cfb-auth.basicauth.users=${BASIC_AUTH_NGINX}'
+      - 'traefik.http.routers.frontend-cfb.middlewares=frontend-cfb-https-redirect'
+      - 'traefik.http.routers.frontend-cfb-secure.middlewares=frontend-cfb-auth'
+      - 'traefik.http.routers.frontend-cfb-secure.entrypoints=websecure'
+      - 'traefik.http.routers.frontend-cfb-secure.rule=Host(`cfb.letstest.pl`)'
+      - 'traefik.http.routers.frontend-cfb-secure.tls=true'
+      - 'traefik.http.routers.frontend-cfb-secure.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.frontend-cfb-secure.service=frontend-cfb'
+      - 'traefik.http.services.frontend-cfb.loadbalancer.server.port=80'
+      - 'traefik.docker.network=traefik'
+    networks:
+      traefik:
+      default:
+        aliases:
+          - ${APP_HOST}
+
+networks:
+  traefik:
+    external: true
