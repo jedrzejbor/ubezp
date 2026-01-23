@@ -11,13 +11,25 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
+import { useState } from 'react';
 import PageTitle from '@/components/PageTitle';
 import { useAuthStore } from '@/store/authStore';
+import { useUiStore } from '@/store/uiStore';
+import FormModal from '@/components/modals/FormModal';
+import EditAccountDataForm from '@/components/forms/EditAccountDataForm';
+import ChangePasswordForm from '@/components/forms/ChangePasswordForm';
+import type { EditAccountDataFormValues, ChangePasswordFormValues } from '@/utils/formSchemas';
 
 const SettingsPage = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const user = useAuthStore((state) => state.user);
+  const { addToast } = useUiStore();
+
+  // Modal states
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Mock user data for display (replace with real data from your auth store or API)
   const userData = {
@@ -31,13 +43,57 @@ const SettingsPage = () => {
   };
 
   const handleEdit = () => {
-    // TODO: Open edit dialog/form
-    console.log('Edit account details');
+    setEditModalOpen(true);
   };
 
   const handleChangePassword = () => {
-    // TODO: Open password change dialog/form
-    console.log('Change password');
+    setPasswordModalOpen(true);
+  };
+
+  const handleEditSubmit = async (data: EditAccountDataFormValues) => {
+    setLoading(true);
+    try {
+      // TODO: Call API to update account data
+      console.log('Edit account data:', data);
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Dane konta zostały zaktualizowane',
+        severity: 'success'
+      });
+      setEditModalOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Błąd podczas aktualizacji danych';
+      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (data: ChangePasswordFormValues) => {
+    setLoading(true);
+    try {
+      // TODO: Call API to change password
+      console.log('Change password:', data);
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Hasło zostało zmienione',
+        severity: 'success'
+      });
+      setPasswordModalOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Błąd podczas zmiany hasła';
+      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reusable field component for desktop grid
@@ -459,6 +515,38 @@ const SettingsPage = () => {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Edit Account Data Modal */}
+      <FormModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Edycja danych konta"
+      >
+        <EditAccountDataForm
+          initialValues={{
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            phone: userData.phone
+          }}
+          onSubmit={handleEditSubmit}
+          onCancel={() => setEditModalOpen(false)}
+          loading={loading}
+        />
+      </FormModal>
+
+      {/* Change Password Modal */}
+      <FormModal
+        open={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+        title="Zmień hasło"
+      >
+        <ChangePasswordForm
+          onSubmit={handlePasswordSubmit}
+          onCancel={() => setPasswordModalOpen(false)}
+          loading={loading}
+        />
+      </FormModal>
     </Stack>
   );
 };

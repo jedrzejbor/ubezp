@@ -48,3 +48,33 @@ export const profileSchema = z.object({
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
+
+// Account data edit form schema
+export const editAccountDataSchema = z.object({
+  firstName: z.string().min(1, 'Imię jest wymagane').min(2, 'Imię musi mieć co najmniej 2 znaki'),
+  lastName: z
+    .string()
+    .min(1, 'Nazwisko jest wymagane')
+    .min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
+  email: emailField,
+  phone: z
+    .string()
+    .min(1, 'Numer telefonu jest wymagany')
+    .regex(/^[0-9+() -]{7,20}$/, 'Podaj prawidłowy numer telefonu')
+});
+
+export type EditAccountDataFormValues = z.infer<typeof editAccountDataSchema>;
+
+// Change password form schema
+export const changePasswordSchema = z
+  .object({
+    currentPassword: passwordField,
+    newPassword: passwordField,
+    confirmNewPassword: z.string().min(1, 'Potwierdź nowe hasło')
+  })
+  .refine((values) => values.newPassword === values.confirmNewPassword, {
+    path: ['confirmNewPassword'],
+    message: 'Hasła muszą się zgadzać'
+  });
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
