@@ -58,6 +58,22 @@ export interface DashboardSummary {
   nextMeeting?: string;
 }
 
+export interface UpdateMePayload {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  current_password?: string;
+  password?: string;
+  password_confirmation?: string;
+}
+
+export interface UpdateMeResponse {
+  message?: string;
+  user?: Partial<ApiUser> & { email?: string; phone?: string };
+}
+
 // ============================================
 // Helpery
 // ============================================
@@ -134,6 +150,21 @@ export const logout = async (): Promise<void> => {
     // Nawet jeśli backend zwróci błąd, i tak wyczyścimy lokalny token
     console.error('Logout error:', apiError.message);
     throw new Error(apiError.message || 'Nie udało się wylogować.');
+  }
+};
+
+/**
+ * Aktualizuje dane zalogowanego użytkownika lub zmienia hasło.
+ * Przyjmuje dowolny obiekt z polami, które mają zostać zaktualizowane
+ * (np. { firstname, lastname, email, phone } lub { current_password, password, password_confirmation }).
+ */
+export const updateMe = async (payload: UpdateMePayload): Promise<UpdateMeResponse> => {
+  try {
+    const response = await apiClient.post<UpdateMeResponse>(API_ENDPOINTS.ME, payload);
+    return response;
+  } catch (error) {
+    const apiError = error as ApiError;
+    throw new Error(apiError.message || 'Błąd podczas aktualizacji danych użytkownika.');
   }
 };
 
