@@ -74,6 +74,17 @@ export interface UpdateMeResponse {
   user?: Partial<ApiUser> & { email?: string; phone?: string };
 }
 
+export interface RequestPasswordResetPayload {
+  email: string;
+}
+
+export interface ChangePasswordPayload {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
+
 // ============================================
 // Helpery
 // ============================================
@@ -165,6 +176,37 @@ export const updateMe = async (payload: UpdateMePayload): Promise<UpdateMeRespon
   } catch (error) {
     const apiError = error as ApiError;
     throw new Error(apiError.message || 'Błąd podczas aktualizacji danych użytkownika.');
+  }
+};
+
+/**
+ * Żądanie resetu hasła - wysyła email z linkiem do resetu
+ * Zwraca 204 No Content (void)
+ */
+export const requestPasswordReset = async (payload: RequestPasswordResetPayload): Promise<void> => {
+  try {
+    await apiClient.post<void>(API_ENDPOINTS.PASSWORD_REQUEST, payload, {
+      skipAuth: true
+    });
+  } catch (error) {
+    const apiError = error as ApiError;
+    throw new Error(apiError.message || 'Nie udało się wysłać żądania resetu hasła.');
+  }
+};
+
+/**
+ * Ustawienie nowego hasła po resecie
+ * Wymaga tokena z maila oraz nowego hasła
+ * Zwraca 204 No Content (void)
+ */
+export const changePassword = async (payload: ChangePasswordPayload): Promise<void> => {
+  try {
+    await apiClient.post<void>(API_ENDPOINTS.PASSWORD_CHANGE, payload, {
+      skipAuth: true
+    });
+  } catch (error) {
+    const apiError = error as ApiError;
+    throw new Error(apiError.message || 'Nie udało się zmienić hasła. Spróbuj ponownie.');
   }
 };
 

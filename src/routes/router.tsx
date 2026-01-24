@@ -6,6 +6,7 @@ import LoginPage from '@/pages/LoginPage';
 import TwoFactorAuthPage from '@/pages/TwoFactorAuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import SettingsPage from '@/pages/SettingsPage';
+import ResetPasswordTokenPage from '@/pages/ResetPasswordTokenPage';
 import AppErrorBoundary from '@/routes/AppErrorBoundary';
 import ProtectedRoute from '@/routes/ProtectedRoute';
 import AppLayout from '@/layouts/AppLayout';
@@ -38,8 +39,8 @@ export const router = createBrowserRouter([
         element: <LoginPage initialStage="forgot" />
       },
       {
-        path: '/set-new-password',
-        element: <LoginPage initialStage="reset" />
+        path: '/reset/:token',
+        element: <ResetPasswordTokenPage />
       },
       {
         path: '/verify',

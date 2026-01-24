@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Fade } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import LoginForm from '@/components/forms/LoginForm';
 import ForgotPasswordForm from '@/components/forms/ForgotPasswordForm';
 import PasswordResetSent from '@/components/forms/PasswordResetSent';
@@ -12,13 +12,25 @@ export interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ initialStage = 'login' }) => {
-  const [stage, setStage] = useState<'login' | 'forgot' | 'sent' | 'reset'>(initialStage);
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+
+  // Jeśli URL zawiera token i email, pokaż formularz ustawiania nowego hasła
+  const computedInitialStage = token && email ? 'reset' : initialStage;
+
+  const [stage, setStage] = useState<'login' | 'forgot' | 'sent' | 'reset'>(computedInitialStage);
   const { mode } = useColorMode();
   const navigate = useNavigate();
 
   useEffect(() => {
-    setStage(initialStage);
-  }, [initialStage]);
+    // Jeśli URL zawiera token i email, zawsze pokaż formularz reset
+    if (token && email) {
+      setStage('reset');
+    } else {
+      setStage(initialStage);
+    }
+  }, [initialStage, token, email]);
 
   // Po udanym logowaniu (krok 1) przekieruj do strony 2FA
   const handleLoginSuccess = () => {

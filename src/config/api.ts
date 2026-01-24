@@ -7,7 +7,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 export const API_ENDPOINTS = {
   LOGIN: '/api/login',
   LOGOUT: '/api/logout',
-  ME: '/api/me'
+  ME: '/api/me',
+  PASSWORD_REQUEST: '/api/request',
+  PASSWORD_CHANGE: '/api/change'
   // Tutaj dodawaj kolejne endpointy
 } as const;
 

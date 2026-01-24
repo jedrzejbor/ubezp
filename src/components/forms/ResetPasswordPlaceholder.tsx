@@ -16,8 +16,9 @@ import {
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import { mockCompletePasswordReset } from '@/services/authService';
+import { changePassword } from '@/services/authService';
 import { useUiStore } from '@/store/uiStore';
 
 // Nowy schema tylko dla nowego hasła (bez kodu - kod jest w URL)
@@ -44,6 +45,10 @@ export const ResetPasswordPlaceholder: React.FC<ResetPasswordPlaceholderProps> =
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [searchParams] = useSearchParams();
+
+  const token = searchParams.get('token') || '';
+  const email = searchParams.get('email') || '';
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,13 +62,25 @@ export const ResetPasswordPlaceholder: React.FC<ResetPasswordPlaceholderProps> =
   const { addToast } = useUiStore();
 
   const onSubmit = async (data: SetNewPasswordFormValues) => {
-    try {
-      // Symulujemy reset hasła (w przyszłości tutaj będzie API call z tokenem z URL)
-      console.log(data);
-      await mockCompletePasswordReset('mock-token');
+    if (!token || !email) {
       addToast({
         id: crypto.randomUUID(),
-        message: 'Hasło zostało zmienione',
+        message: 'Nieprawidłowy link resetowania hasła. Spróbuj ponownie.',
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      await changePassword({
+        email,
+        token,
+        password: data.password,
+        password_confirmation: data.confirmPassword
+      });
+      addToast({
+        id: crypto.randomUUID(),
+        message: 'Hasło zostało zmienione. Możesz się teraz zalogować.',
         severity: 'success'
       });
       onSuccess?.();

@@ -6,7 +6,7 @@ import BrandLogo from '@/components/BrandLogo';
 import backgroundImage from '@/assets/background-image.svg';
 // import { useColorMode } from '@/theme';
 import heroDesktop from '@/assets/hero-desktop.jpg';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -16,8 +16,17 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
   const theme = useTheme();
   // const { toggleColorMode, mode } = useColorMode();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const isLight = theme.palette.mode === 'light';
+
+  // Ukryj logo na stronach verify i reset-password (w tym gdy jest token w URL)
+  const isResetPasswordWithToken =
+    location.pathname === '/reset-password' && searchParams.has('token');
+  const shouldHideLogo =
+    location.pathname === '/verify' ||
+    location.pathname === '/reset-password' ||
+    isResetPasswordWithToken;
 
   return (
     <Box
@@ -73,11 +82,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           >
             {/* Desktop: Logo at center top */}
             <Stack spacing={2} alignItems="center" sx={{ mb: 2, mt: 10 }}>
-              {location.pathname !== '/verify' &&
-                location.pathname !== '/reset-password' &&
-                location.pathname !== '/set-new-password' && (
-                  <BrandLogo size="md" variant="light" />
-                )}
+              {!shouldHideLogo && <BrandLogo size="md" variant="light" />}
             </Stack>
 
             {/* Form content - centered */}
@@ -200,9 +205,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         >
           {/* Logo at top - only on mobile */}
           <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
-            {location.pathname !== '/verify' &&
-              location.pathname !== '/reset-password' &&
-              location.pathname !== '/set-new-password' && <BrandLogo size="lg" variant="light" />}
+            {!shouldHideLogo && <BrandLogo size="lg" variant="light" />}
           </Stack>
 
           {/* Theme toggle - mobile */}

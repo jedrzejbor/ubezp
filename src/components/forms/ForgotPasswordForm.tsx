@@ -4,8 +4,8 @@ import { Box, Button, Stack, TextField, Typography, useMediaQuery, useTheme } fr
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from '@/utils/formSchemas';
-import { mockRequestPasswordReset } from '@/services/authService';
-import { useUiStore } from '@/store/uiStore';
+import { requestPasswordReset } from '@/services/authService';
+// import { useUiStore } from '@/store/uiStore';
 
 interface ForgotPasswordFormProps {
   onBackToLogin?: () => void;
@@ -25,16 +25,18 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     formState: { errors, isSubmitting }
   } = useForm<ForgotPasswordFormValues>({ resolver: zodResolver(forgotPasswordSchema) });
 
-  const { addToast } = useUiStore();
+  // const { addToast } = useUiStore();
 
   const onSubmit = async (data: ForgotPasswordFormValues) => {
     try {
-      await mockRequestPasswordReset(data.email);
+      await requestPasswordReset({ email: data.email });
       // Zawsze pokazuj sukces (nawet jeśli konto nie istnieje - bezpieczeństwo)
       onProceed?.();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Nieznany błąd';
-      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
+      console.error('Błąd podczas żądania resetu hasła:', error);
+      // Nawet przy błędzie pokazujemy sukces dla bezpieczeństwa
+      // (nie ujawniamy czy email istnieje w systemie)
+      onProceed?.();
     }
   };
 
