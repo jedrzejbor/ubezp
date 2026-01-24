@@ -58,11 +58,14 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         startIcon={<ArrowBackIcon />}
         onClick={onBackToLogin}
         sx={{
+          position: 'absolute',
           alignSelf: 'flex-start',
           color: '#1E1F21',
           px: 1.5,
           mb: 4,
-          mt: -2
+          mt: -2,
+          top: '40px',
+          left: '20px'
         }}
       >
         {isMobile ? 'Wróć' : 'Wróć do logowania'}
