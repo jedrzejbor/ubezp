@@ -1,4 +1,4 @@
-import LockOpenRoundedIcon from '@mui/icons-material/LockOpenRounded';
+import passwordLock from '@/assets/password-lock.svg';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -137,7 +137,12 @@ export const ResetPasswordPlaceholder: React.FC<ResetPasswordPlaceholderProps> =
             justifyContent: 'center'
           }}
         >
-          <LockOpenRoundedIcon sx={{ fontSize: 36, color: '#8F6D5F' }} />
+          <Box
+            component="img"
+            src={passwordLock}
+            alt="Lock"
+            sx={{ width: 36, height: 36, objectFit: 'contain' }}
+          />
         </Box>
 
         {/* Title & Description */}
