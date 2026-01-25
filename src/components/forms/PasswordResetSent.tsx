@@ -1,4 +1,4 @@
-import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
+import mailSent from '@/assets/mail-sent.svg';
 import { Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 interface PasswordResetSentProps {
@@ -32,7 +32,12 @@ export const PasswordResetSent: React.FC<PasswordResetSentProps> = ({ onBackToLo
             justifyContent: 'center'
           }}
         >
-          <MailOutlineRoundedIcon sx={{ fontSize: 36, color: '#8F6D5F' }} />
+          <Box
+            component="img"
+            src={mailSent}
+            alt="Mail sent"
+            sx={{ width: 36, height: 36, objectFit: 'contain' }}
+          />
         </Box>
 
         {/* Title & Description */}
