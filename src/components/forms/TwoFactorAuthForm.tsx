@@ -8,7 +8,7 @@ import {
   Typography
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
+import userSvg from '@/assets/user.svg';
 import { useState, useRef, KeyboardEvent, ClipboardEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUiStore } from '@/store/uiStore';
@@ -188,11 +188,11 @@ export const TwoFactorAuthForm: React.FC<TwoFactorAuthFormProps> = ({
             justifyContent: 'center'
           }}
         >
-          <PersonOutlineRoundedIcon
-            sx={{
-              fontSize: 40,
-              color: 'secondary.main'
-            }}
+          <Box
+            component="img"
+            src={userSvg}
+            alt="User"
+            sx={{ width: 40, height: 40, objectFit: 'contain' }}
           />
         </Box>
 
