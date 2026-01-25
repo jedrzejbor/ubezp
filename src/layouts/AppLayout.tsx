@@ -175,7 +175,7 @@ const AppLayout = () => {
       <Container
         disableGutters
         maxWidth={false}
-        sx={{ maxWidth: '100%', px: 0, pr: 3, height: '100%' }}
+        sx={{ maxWidth: '100%', pl: { xs: 3, md: 0 }, pr: 3, height: '100%' }}
       >
         <Outlet />
       </Container>

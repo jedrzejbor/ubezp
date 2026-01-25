@@ -4,8 +4,9 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import type { SvgIconProps } from '@mui/material/SvgIcon';
 import type { SxProps, Theme } from '@mui/system';
 
-// Figma-provided SVG asset (served from local design server)
-const FIGMA_HOME_SVG = 'http://localhost:3845/assets/e6eeaffa20fce38d9f2cfe4412ceed7ea055fe65.svg';
+// Local SVG asset used for the home icon
+import homeIcon from '@/assets/home-icon.svg';
+const FIGMA_HOME_SVG = homeIcon;
 
 const HomeIcon: React.FC<SvgIconProps> = (props) => {
   const [failed, setFailed] = useState(false);

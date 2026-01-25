@@ -19,11 +19,13 @@ import FormModal from '@/components/modals/FormModal';
 import EditAccountDataForm from '@/components/forms/EditAccountDataForm';
 import ChangePasswordForm from '@/components/forms/ChangePasswordForm';
 import type { EditAccountDataFormValues, ChangePasswordFormValues } from '@/utils/formSchemas';
+import { updateMe } from '@/services/authService';
 
 const SettingsPage = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
   const { addToast } = useUiStore();
 
   // Modal states
@@ -53,11 +55,36 @@ const SettingsPage = () => {
   const handleEditSubmit = async (data: EditAccountDataFormValues) => {
     setLoading(true);
     try {
-      // TODO: Call API to update account data
-      console.log('Edit account data:', data);
+      // Call API to update account data
+      const resp = await updateMe({
+        firstname: data.firstName,
+        lastname: data.lastName,
+        email: data.email,
+        phone: data.phone
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Backend may return the updated user object or partial fields.
+      const returned = resp?.user ?? resp ?? {};
+
+      // Merge returned fields into auth store user
+      const newFirstname = returned.firstname ?? data.firstName ?? user?.firstname;
+      const newLastname = returned.lastname ?? data.lastName ?? user?.lastname;
+      const newEmail = returned.email ?? data.email ?? user?.email;
+      const newPosition = returned.position ?? user?.position;
+      const newPhone = returned.phone ?? data.phone ?? user?.phone;
+
+      const updatedUser = {
+        ...(user ?? {}),
+        id: user?.id ?? (returned.id ? String(returned.id) : ''),
+        firstname: newFirstname,
+        lastname: newLastname,
+        email: newEmail,
+        position: newPosition,
+        phone: newPhone,
+        name: `${newFirstname ?? ''} ${newLastname ?? ''}`.trim()
+      };
+
+      setUser(updatedUser);
 
       addToast({
         id: crypto.randomUUID(),
@@ -76,11 +103,27 @@ const SettingsPage = () => {
   const handlePasswordSubmit = async (data: ChangePasswordFormValues) => {
     setLoading(true);
     try {
-      // TODO: Call API to change password
-      console.log('Change password:', data);
+      // Call API to change password
+      const resp = await updateMe({
+        current_password: data.currentPassword,
+        password: data.newPassword,
+        password_confirmation: data.confirmNewPassword
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // If email or other fields are returned, merge them as well
+      const returned = resp?.user ?? resp ?? {};
+      if (returned && Object.keys(returned).length > 0) {
+        const updatedUser = {
+          ...(user ?? {}),
+          id: user?.id ?? (returned.id ? String(returned.id) : ''),
+          firstname: returned.firstname ?? user?.firstname,
+          lastname: returned.lastname ?? user?.lastname,
+          email: returned.email ?? user?.email,
+          position: returned.position ?? user?.position,
+          name: `${returned.firstname ?? user?.firstname ?? ''} ${returned.lastname ?? user?.lastname ?? ''}`.trim()
+        };
+        setUser(updatedUser);
+      }
 
       addToast({
         id: crypto.randomUUID(),

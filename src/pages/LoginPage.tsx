@@ -1,27 +1,60 @@
 import { useEffect, useState } from 'react';
 import { Fade } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import LoginForm from '@/components/forms/LoginForm';
 import ForgotPasswordForm from '@/components/forms/ForgotPasswordForm';
+import PasswordResetSent from '@/components/forms/PasswordResetSent';
 import ResetPasswordPlaceholder from '@/components/forms/ResetPasswordPlaceholder';
 import { useColorMode } from '@/theme';
 
 export interface LoginPageProps {
-  initialStage?: 'login' | 'forgot' | 'reset';
+  initialStage?: 'login' | 'forgot' | 'sent' | 'reset';
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ initialStage = 'login' }) => {
-  const [stage, setStage] = useState<'login' | 'forgot' | 'reset'>(initialStage);
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+
+  // Jeśli URL zawiera token i email, pokaż formularz ustawiania nowego hasła
+  const computedInitialStage = token && email ? 'reset' : initialStage;
+
+  const [stage, setStage] = useState<'login' | 'forgot' | 'sent' | 'reset'>(computedInitialStage);
   const { mode } = useColorMode();
   const navigate = useNavigate();
 
   useEffect(() => {
-    setStage(initialStage);
-  }, [initialStage]);
+    // Jeśli URL zawiera token i email, zawsze pokaż formularz reset
+    if (token && email) {
+      setStage('reset');
+    } else {
+      setStage(initialStage);
+    }
+  }, [initialStage, token, email]);
 
   // Po udanym logowaniu (krok 1) przekieruj do strony 2FA
   const handleLoginSuccess = () => {
     navigate('/verify', { replace: true });
+  };
+
+  // Przejście do formularza "Nie pamiętam hasła"
+  const handleForgotPassword = () => {
+    navigate('/reset-password');
+  };
+
+  // Po wysłaniu emaila z resetem hasła
+  const handlePasswordResetSent = () => {
+    setStage('sent');
+  };
+
+  // Powrót do logowania
+  const handleBackToLogin = () => {
+    navigate('/login');
+  };
+
+  // Po ustawieniu nowego hasła
+  const handlePasswordResetComplete = () => {
+    navigate('/login');
   };
 
   return (
@@ -30,17 +63,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialStage = 'login' }) 
         {stage === 'login' && (
           <LoginForm
             onSuccess={handleLoginSuccess}
-            onForgotPassword={() => setStage('forgot')}
+            onForgotPassword={handleForgotPassword}
             onBecomeClient={() => window.open('#', '_blank')}
           />
         )}
         {stage === 'forgot' && (
           <ForgotPasswordForm
-            onBackToLogin={() => setStage('login')}
-            onProceed={() => setStage('reset')}
+            onBackToLogin={handleBackToLogin}
+            onProceed={handlePasswordResetSent}
           />
         )}
-        {stage === 'reset' && <ResetPasswordPlaceholder onBack={() => setStage('login')} />}
+        {stage === 'sent' && <PasswordResetSent onBackToLogin={handleBackToLogin} />}
+        {stage === 'reset' && (
+          <ResetPasswordPlaceholder
+            onBack={handleBackToLogin}
+            onSuccess={handlePasswordResetComplete}
+          />
+        )}
       </div>
     </Fade>
   );
