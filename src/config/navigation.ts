@@ -1,7 +1,7 @@
 import HomeIcon from '@/components/icons/HomeIcon';
 import ShieldIcon from '@/components/icons/ShieldIcon';
 import DamageIcon from '@/components/icons/DamageIcon';
-import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import type { SvgIconProps } from '@mui/material/SvgIcon';
 
@@ -48,7 +48,7 @@ export const navigationItems: NavItem[] = [
     id: 'payments',
     label: 'Płatności',
     path: '/app/payments',
-    icon: PaymentsOutlinedIcon,
+    icon: PaymentsIcon,
     showInMobileMenu: true
   },
   {

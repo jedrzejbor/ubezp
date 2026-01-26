@@ -1,4 +1,5 @@
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+// AccountBalanceWalletOutlinedIcon replaced by PaymentsIcon
+import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -70,7 +71,7 @@ const menuSections: MenuSection[] = [
       {
         label: 'Płatności składek',
         to: '/app/payments',
-        icon: <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <PaymentsIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Klienci',
