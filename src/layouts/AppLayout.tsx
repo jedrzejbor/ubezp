@@ -1,31 +1,40 @@
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+// AccountBalanceWalletOutlinedIcon replaced by PaymentsIcon
+import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import InsurersIcon from '@/components/icons/InsurersIcon';
+import ClientIcon from '@/components/icons/ClientIcon';
+import UsersIcon from '@/components/icons/UsersIcon';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
+import DamageIcon from '@/components/icons/DamageIcon';
+import KnowledgeBaseIcon from '@/components/icons/KnowledgeBaseIcon';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import InsurerContactsIcon from '@/components/icons/InsurerContactsIcon';
+import ShieldIcon from '@/components/icons/ShieldIcon';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { Container } from '@mui/material';
+import { Container, Box } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 import AppShell, { BreadcrumbItem } from '@/components/layout/AppShell';
 import { MenuSection } from '@/components/navigation/DesktopSidebar';
 import { UserMenuOption } from '@/components/navigation/UserMenu';
 import { useAuthStore } from '@/store/authStore';
+import homeIcon from '@/assets/home-icon.svg';
 
 // Mobile navigation items (for bottom bar)
 const navItems = [
   {
     label: 'Panel główny',
     to: '/app',
-    icon: <DashboardOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />
+    icon: (
+      <Box
+        component="img"
+        src={homeIcon}
+        alt="Home"
+        sx={{ width: 24, height: 24, display: 'block' }}
+      />
+    )
   },
   {
     label: 'Konto',
@@ -41,47 +50,54 @@ const menuSections: MenuSection[] = [
       {
         label: 'Pulpit',
         to: '/app/dashboard',
-        icon: <DashboardOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: (
+          <Box
+            component="img"
+            src={homeIcon}
+            alt="Home"
+            sx={{ width: 24, height: 24, display: 'block' }}
+          />
+        )
       },
       {
         label: 'Polisy',
         to: '/app/policies',
-        icon: <SecurityOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <ShieldIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Szkody',
         to: '/app/damages',
-        icon: <ImageOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <DamageIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Płatności składek',
         to: '/app/payments',
-        icon: <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <PaymentsIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Klienci',
         to: '/app/clients',
-        icon: <FolderOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <ClientIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Użytkownicy',
         to: '/app/users',
-        icon: <GroupOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <UsersIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Ubezpieczyciele',
         to: '/app/insurers',
-        icon: <BusinessOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurersIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Ubezpieczyciel Kontakty',
         to: '/app/insurer-contacts',
-        icon: <PeopleAltOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurerContactsIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Formularze',
         to: '/app/forms',
-        icon: <DescriptionOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurerContactsIcon sx={{ fontSize: 24 }} />
       }
     ]
   },
@@ -90,7 +106,7 @@ const menuSections: MenuSection[] = [
       {
         label: 'Baza wiedzy',
         to: '/app/knowledge-base',
-        icon: <LibraryBooksOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <KnowledgeBaseIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Raporty',

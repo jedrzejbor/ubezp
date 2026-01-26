@@ -1,7 +1,7 @@
 import HomeIcon from '@/components/icons/HomeIcon';
-import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
-import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
-import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import ShieldIcon from '@/components/icons/ShieldIcon';
+import DamageIcon from '@/components/icons/DamageIcon';
+import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import type { SvgIconProps } from '@mui/material/SvgIcon';
 
@@ -34,28 +34,28 @@ export const navigationItems: NavItem[] = [
     id: 'policies',
     label: 'Polisy',
     path: '/app/policies',
-    icon: ShieldOutlinedIcon,
+    icon: ShieldIcon,
     showInMobileMenu: true
   },
   {
     id: 'claims',
     label: 'Szkody',
     path: '/app/claims',
-    icon: ReceiptLongOutlinedIcon,
+    icon: DamageIcon,
     showInMobileMenu: true
   },
   {
     id: 'payments',
     label: 'Płatności',
     path: '/app/payments',
-    icon: PaymentsOutlinedIcon,
+    icon: PaymentsIcon,
     showInMobileMenu: true
   },
   {
     id: 'documents',
     label: 'Dokumenty',
     path: '/app/documents',
-    icon: ShieldOutlinedIcon,
+    icon: ShieldIcon,
     showInMobileMenu: false
   },
   {

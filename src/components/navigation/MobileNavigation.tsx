@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getMobileMenuItems, getMoreMenuItems } from '@/config/navigation';
-import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
+import MoreIcon from '@/components/icons/MoreIcon';
 
 export const MobileNavigation: React.FC = () => {
   const theme = useTheme();
@@ -142,7 +142,7 @@ export const MobileNavigation: React.FC = () => {
           <BottomNavigationAction
             label="Więcej"
             value="more"
-            icon={<GridViewOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />}
+            icon={<MoreIcon sx={{ fontSize: 24, width: 24, height: 24 }} />}
             sx={{ color: 'rgba(255, 255, 255, 0.7)', '&.Mui-selected': { color: '#FFFFFF' } }}
           />
         )}
