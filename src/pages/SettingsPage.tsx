@@ -64,7 +64,7 @@ const SettingsPage = () => {
       });
 
       // Backend may return the updated user object or partial fields.
-      const returned = resp?.user ?? resp ?? {};
+      const returned = resp?.user ?? {};
 
       // Merge returned fields into auth store user
       const newFirstname = returned.firstname ?? data.firstName ?? user?.firstname;
@@ -111,7 +111,7 @@ const SettingsPage = () => {
       });
 
       // If email or other fields are returned, merge them as well
-      const returned = resp?.user ?? resp ?? {};
+      const returned = resp?.user ?? {};
       if (returned && Object.keys(returned).length > 0) {
         const updatedUser = {
           ...(user ?? {}),
