@@ -2,7 +2,7 @@
 import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import InsurersIcon from '@/components/icons/InsurersIcon';
 import ClientIcon from '@/components/icons/ClientIcon';
 import UsersIcon from '@/components/icons/UsersIcon';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
@@ -10,6 +10,7 @@ import DamageIcon from '@/components/icons/DamageIcon';
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import InsurerContactsIcon from '@/components/icons/InsurerContactsIcon';
 import ShieldIcon from '@/components/icons/ShieldIcon';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Container, Box } from '@mui/material';
@@ -86,17 +87,17 @@ const menuSections: MenuSection[] = [
       {
         label: 'Ubezpieczyciele',
         to: '/app/insurers',
-        icon: <BusinessOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurersIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Ubezpieczyciel Kontakty',
         to: '/app/insurer-contacts',
-        icon: <PeopleAltOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurerContactsIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Formularze',
         to: '/app/forms',
-        icon: <DescriptionOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <InsurerContactsIcon sx={{ fontSize: 24 }} />
       }
     ]
   },
