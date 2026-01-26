@@ -7,7 +7,7 @@ import ClientIcon from '@/components/icons/ClientIcon';
 import UsersIcon from '@/components/icons/UsersIcon';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import DamageIcon from '@/components/icons/DamageIcon';
-import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
+import KnowledgeBaseIcon from '@/components/icons/KnowledgeBaseIcon';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import InsurerContactsIcon from '@/components/icons/InsurerContactsIcon';
@@ -106,7 +106,7 @@ const menuSections: MenuSection[] = [
       {
         label: 'Baza wiedzy',
         to: '/app/knowledge-base',
-        icon: <LibraryBooksOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <KnowledgeBaseIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Raporty',

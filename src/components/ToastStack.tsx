@@ -21,7 +21,13 @@ export const ToastStack: React.FC = () => {
             severity={toast.severity ?? 'info'}
             variant="filled"
             onClose={() => removeToast(toast.id)}
-            sx={{ width: '100%' }}
+            sx={{
+              width: '100%',
+              color: 'common.white',
+              '& .MuiAlert-action': { color: 'inherit' },
+              '& .MuiAlert-icon': { color: 'inherit' },
+              '& .MuiAlert-message': { color: 'inherit' }
+            }}
           >
             {toast.message}
           </Alert>
