@@ -1,31 +1,38 @@
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import DamageIcon from '@/components/icons/DamageIcon';
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import ShieldIcon from '@/components/icons/ShieldIcon';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { Container } from '@mui/material';
+import { Container, Box } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 import AppShell, { BreadcrumbItem } from '@/components/layout/AppShell';
 import { MenuSection } from '@/components/navigation/DesktopSidebar';
 import { UserMenuOption } from '@/components/navigation/UserMenu';
 import { useAuthStore } from '@/store/authStore';
+import homeIcon from '@/assets/home-icon.svg';
 
 // Mobile navigation items (for bottom bar)
 const navItems = [
   {
     label: 'Panel główny',
     to: '/app',
-    icon: <DashboardOutlinedIcon sx={{ fontSize: 24, width: 24, height: 24 }} />
+    icon: (
+      <Box
+        component="img"
+        src={homeIcon}
+        alt="Home"
+        sx={{ width: 24, height: 24, display: 'block' }}
+      />
+    )
   },
   {
     label: 'Konto',
@@ -41,17 +48,24 @@ const menuSections: MenuSection[] = [
       {
         label: 'Pulpit',
         to: '/app/dashboard',
-        icon: <DashboardOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: (
+          <Box
+            component="img"
+            src={homeIcon}
+            alt="Home"
+            sx={{ width: 24, height: 24, display: 'block' }}
+          />
+        )
       },
       {
         label: 'Polisy',
         to: '/app/policies',
-        icon: <SecurityOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <ShieldIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Szkody',
         to: '/app/damages',
-        icon: <ImageOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <DamageIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Płatności składek',
