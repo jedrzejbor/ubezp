@@ -3,8 +3,8 @@ import PaymentsIcon from '@/components/icons/PaymentsIcon';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import ClientIcon from '@/components/icons/ClientIcon';
+import UsersIcon from '@/components/icons/UsersIcon';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import DamageIcon from '@/components/icons/DamageIcon';
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
@@ -76,12 +76,12 @@ const menuSections: MenuSection[] = [
       {
         label: 'Klienci',
         to: '/app/clients',
-        icon: <FolderOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <ClientIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Użytkownicy',
         to: '/app/users',
-        icon: <GroupOutlinedIcon sx={{ fontSize: 24 }} />
+        icon: <UsersIcon sx={{ fontSize: 24 }} />
       },
       {
         label: 'Ubezpieczyciele',
