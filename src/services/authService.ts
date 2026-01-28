@@ -19,6 +19,7 @@ export interface ApiUser {
   firstname: string;
   lastname: string;
   position: string;
+  phone?: string;
   created_at: string;
 }
 
@@ -41,6 +42,7 @@ export interface AuthUser {
   firstname: string;
   lastname: string;
   position: string;
+  phone?: string;
   createdAt: string;
   [key: string]: unknown;
 }
@@ -103,6 +105,7 @@ const mapApiUserToAuthUser = (apiUser: ApiUser, email: string): AuthUser => ({
   firstname: apiUser.firstname,
   lastname: apiUser.lastname,
   position: apiUser.position,
+  phone: apiUser.phone,
   createdAt: apiUser.created_at
 });
 
@@ -122,6 +125,18 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
     return response;
   } catch (error) {
     const apiError = error as ApiError;
+    // Błąd 401 (nieprawidłowe dane logowania)
+    if (apiError.status === 401) {
+      throw new Error('Nieprawidłowe hasło bądź login');
+    }
+    // Błąd 422 (walidacja hasła) - pokaż generyczny komunikat
+    if (apiError.status === 422) {
+      throw new Error('Nieprawidłowe hasło lub login');
+    }
+    // Błąd 429 (zbyt wiele prób)
+    if (apiError.status === 429) {
+      throw new Error('Za dużo prób logowania, proszę poczekać');
+    }
     throw new Error(apiError.message || 'Niepoprawne dane logowania. Spróbuj ponownie.');
   }
 };

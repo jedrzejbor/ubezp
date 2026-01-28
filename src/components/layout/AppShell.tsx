@@ -320,50 +320,126 @@ export const AppShell: React.FC<AppShellProps> = ({
           sx={{
             zIndex: (theme) => theme.zIndex.modal + 2000,
             '& .MuiDrawer-paper': {
-              borderRadius: '16px 16px 0 0',
+              borderRadius: '20px 20px 0 0',
               backgroundColor: theme.palette.mode === 'light' ? '#FFFFFF' : '#1A1B1F',
-              p: 3
+              p: 0
             }
           }}
         >
-          <Stack spacing={2}>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Avatar
+          {/* Close button */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+            <IconButton
+              onClick={toggleAccountDrawer}
+              sx={{
+                color: '#8E9098',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              <Box
+                component="span"
                 sx={{
-                  bgcolor: 'secondary.main',
-                  color: 'secondary.contrastText',
-                  width: 48,
-                  height: 48
+                  display: 'inline-block',
+                  width: 24,
+                  height: 24,
+                  fontSize: 24,
+                  lineHeight: 1
                 }}
               >
-                {user?.name?.[0] ?? 'C'}
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" fontWeight={500}>
-                  {user?.name ?? 'Gość'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {user?.email ?? 'brak danych'}
-                </Typography>
+                ✕
               </Box>
-            </Stack>
+            </IconButton>
+          </Box>
 
-            <Divider />
+          {/* User info header */}
+          <Box sx={{ px: 2, pb: 1 }}>
+            <Typography
+              sx={{
+                fontSize: '20px',
+                fontWeight: 300,
+                lineHeight: '32px',
+                letterSpacing: '-0.4px',
+                color: '#32343A',
+                textAlign: 'center'
+              }}
+            >
+              {user?.name ?? 'Gość'}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 400,
+                lineHeight: '1.66',
+                letterSpacing: '0.4px',
+                color: '#32343A',
+                textAlign: 'center'
+              }}
+            >
+              Cliffside Bokers
+            </Typography>
+          </Box>
 
+          {/* User menu options */}
+          <Box sx={{ pb: 1 }}>
+            {userMenuOptions?.map((option, index) => (
+              <ListItemButton
+                key={index}
+                onClick={() => {
+                  option.onClick?.();
+                  setAccountDrawerOpen(false);
+                }}
+                sx={{
+                  px: 2,
+                  py: 1,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32, color: '#8E9098' }}>{option.icon}</ListItemIcon>
+                <ListItemText
+                  primary={option.label}
+                  primaryTypographyProps={{
+                    sx: {
+                      fontSize: '14px',
+                      fontWeight: 400,
+                      lineHeight: '1.43',
+                      letterSpacing: '0.17px',
+                      color: '#32343A'
+                    }
+                  }}
+                />
+              </ListItemButton>
+            ))}
+          </Box>
+
+          <Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.12)' }} />
+
+          {/* Logout button */}
+          <Box sx={{ py: 1 }}>
             <ListItemButton
               onClick={handleLogout}
               disabled={loggingOut}
               sx={{
-                borderRadius: 2,
+                px: 2,
+                py: 1,
                 '&:hover': { bgcolor: 'action.hover' }
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
+              <ListItemIcon sx={{ minWidth: 32, color: '#8E9098' }}>
                 {loggingOut ? <CircularProgress size={20} /> : <LogoutRoundedIcon />}
               </ListItemIcon>
-              <ListItemText primary={loggingOut ? 'Wylogowywanie...' : 'Wyloguj'} />
+              <ListItemText
+                primary={loggingOut ? 'Wylogowywanie...' : 'Wyloguj się'}
+                primaryTypographyProps={{
+                  sx: {
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    lineHeight: '1.43',
+                    letterSpacing: '0.17px',
+                    color: '#32343A'
+                  }
+                }}
+              />
             </ListItemButton>
-          </Stack>
+          </Box>
         </Drawer>
       )}
     </Box>
