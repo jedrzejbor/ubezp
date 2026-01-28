@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-const emailField = z
-  .string()
-  .min(1, 'Adres e-mail jest wymagany')
-  .email('Podaj prawidłowy adres e-mail');
+const emailField = z.string().min(1, '').email('Błędny adres email');
 
-const passwordField = z.string().min(8, 'Hasło musi mieć co najmniej 8 znaków');
+const passwordField = z
+  .string()
+  .min(1, 'Te pola nie mogą być puste')
+  .min(8, 'Hasło musi mieć co najmniej 8 znaków');
 
 export const loginSchema = z.object({
   email: emailField,

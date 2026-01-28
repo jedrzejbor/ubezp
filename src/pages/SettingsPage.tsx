@@ -34,12 +34,20 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
 
   // Mock user data for display (replace with real data from your auth store or API)
-  const userData = {
+  const userData: {
+    firstName: string;
+    lastName: string;
+    position: string;
+    status: string;
+    phone: string;
+    email: string;
+    lastPasswordChange: string;
+  } = {
     firstName: user?.firstname || user?.name?.split(' ')[0] || 'Joanna',
     lastName: user?.lastname || user?.name?.split(' ')[1] || 'Kowalska',
     position: user?.position || 'Super Admin Cliffside Brokers',
     status: 'Aktywny',
-    phone: '+48 123 123 123',
+    phone: String(user?.phone ?? '+48 123 123 123'),
     email: user?.email || 'joannakowalska@cliffsidebrokers.com',
     lastPasswordChange: '2.11.2025'
   };
