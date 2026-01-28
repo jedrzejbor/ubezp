@@ -33,10 +33,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const {
     handleSubmit,
     register,
-    formState: { errors }
+    formState: { errors },
+    setError: setFormError
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
-  const { setLoading, loading, setError, clearError, setPendingAuth } = useAuthStore();
+  const { setLoading, loading, clearError, setPendingAuth } = useAuthStore();
   const { addToast } = useUiStore();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -61,8 +62,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       onSuccess?.();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Nieznany błąd';
-      setError(message);
-      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
+      // Wyświetl błąd pod polem hasła (tak samo jak błędy walidacji)
+      setFormError('password', { type: 'manual', message });
+      // Podświetl również pole email
+      setFormError('email', { type: 'manual', message: '' });
     } finally {
       setLoading(false);
     }
@@ -97,7 +100,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           label="E-mail"
           type="email"
           autoComplete="email"
-          error={Boolean(errors.email)}
+          error={Boolean(errors.email || errors.password)}
           helperText={errors.email?.message}
           {...register('email')}
         />
@@ -106,7 +109,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           label="Hasło"
           type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
-          error={Boolean(errors.password)}
+          error={Boolean(errors.email || errors.password)}
           helperText={errors.password?.message}
           {...register('password')}
           InputProps={{

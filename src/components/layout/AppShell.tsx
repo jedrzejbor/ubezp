@@ -350,6 +350,26 @@ export const AppShell: React.FC<AppShellProps> = ({
 
             <Divider />
 
+            {/* User menu options - same as desktop */}
+            {userMenuOptions?.map((option, index) => (
+              <ListItemButton
+                key={index}
+                onClick={() => {
+                  option.onClick?.();
+                  setAccountDrawerOpen(false);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>{option.icon}</ListItemIcon>
+                <ListItemText primary={option.label} />
+              </ListItemButton>
+            ))}
+
+            {userMenuOptions && userMenuOptions.length > 0 && <Divider />}
+
             <ListItemButton
               onClick={handleLogout}
               disabled={loggingOut}
