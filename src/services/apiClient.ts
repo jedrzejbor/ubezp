@@ -3,19 +3,8 @@ import { useAuthStore } from '@/store/authStore';
 
 /**
  * Klient HTTP do komunikacji z backendem
- * Automatycznie dodaje:
- * - Basic Auth header dla Traefik (infrastruktura) - używamy X-Custom-Auth lub Proxy-Authorization
- * - Bearer token dla API aplikacji (jeśli użytkownik zalogowany)
- *
- * UWAGA: Traefik Basic Auth i Bearer token dla API używają tego samego nagłówka Authorization.
- * Rozwiązanie: Dla niezalogowanych użytkowników używamy Basic Auth,
- * dla zalogowanych używamy Bearer token (Traefik powinien przepuszczać oba).
+ * Automatycznie dodaje Bearer token jeśli jest dostępny
  */
-
-// Basic Auth credentials dla Traefik
-const BASIC_AUTH_USER = 'cliffside';
-const BASIC_AUTH_PASSWORD = '&vj!93JYiWM11SHCNDguNMEUqRY4GG&y';
-const BASIC_AUTH_TOKEN = btoa(`${BASIC_AUTH_USER}:${BASIC_AUTH_PASSWORD}`);
 
 interface RequestOptions extends RequestInit {
   skipAuth?: boolean;
@@ -35,20 +24,16 @@ class ApiClient {
   }
 
   private getHeaders(skipAuth = false): HeadersInit {
-    const headers: Record<string, string> = {
+    const headers: HeadersInit = {
       'Content-Type': 'application/json',
       Accept: 'application/json'
     };
 
-    // Sprawdź czy użytkownik jest zalogowany
-    const token = !skipAuth ? useAuthStore.getState().token : null;
-
-    if (token) {
-      // Użytkownik zalogowany - Bearer token dla API
-      headers['Authorization'] = `Bearer ${token}`;
-    } else {
-      // Użytkownik niezalogowany - Basic Auth dla Traefik
-      headers['Authorization'] = `Basic ${BASIC_AUTH_TOKEN}`;
+    if (!skipAuth) {
+      const token = useAuthStore.getState().token;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
 
     return headers;
