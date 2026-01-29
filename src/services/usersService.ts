@@ -24,7 +24,7 @@ export interface UserRecord extends GenericRecord {
 const getMockResponse = (params: FetcherParams): GenericListResponse<UserRecord> => {
   // Row actions that apply to all users
   const rowActions = [
-    { type: 'button_primary' as const, label: 'Podgląd', handler: 'view' },
+    { type: 'button_primary' as const, label: 'Szczegóły', handler: 'view' },
     { type: 'button_secondary' as const, label: 'Edytuj', handler: 'edit' },
     { type: 'button_delete' as const, label: 'Usuń', handler: 'delete' }
   ];

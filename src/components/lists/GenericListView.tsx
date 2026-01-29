@@ -456,6 +456,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             PaperProps={{
               sx: {
+                bgcolor: 'white',
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 minWidth: 200,
@@ -493,7 +494,8 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
             sx={{
               '& .MuiDrawer-paper': {
                 width: 320,
-                p: 3
+                p: 3,
+                bgcolor: 'white'
               }
             }}
           >

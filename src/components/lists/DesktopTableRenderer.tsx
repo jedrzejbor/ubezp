@@ -16,7 +16,8 @@ import {
   Link,
   Skeleton,
   Box,
-  Typography
+  Typography,
+  Divider
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -418,43 +419,78 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
           sx: {
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            minWidth: 160,
-            mt: 0.5
+            bgcolor: 'white',
+            border: '1px solid #D0D5DD',
+            borderRadius: '4px',
+            boxShadow: '0px 1px 2px 0px rgba(16, 24, 40, 0.05)',
+            minWidth: 110,
+            mt: 0.5,
+            overflow: 'visible',
+            '& .MuiList-root': {
+              p: '12px 16px',
+              display: 'flex',
+              flexDirection: 'column'
+            }
           }
         }}
       >
-        {menuRow?.actions?.map((action: ActionDef) => (
-          <MenuItem
-            key={action.handler}
-            onClick={() => handleActionClick(action.handler)}
-            sx={{
-              color: action.type === 'button_delete' ? '#EF4444' : '#32343A',
-              fontSize: '14px',
-              py: 1.25,
-              px: 2,
-              '&:hover': {
-                bgcolor: '#F9FAFB'
-              }
-            }}
-          >
-            <ListItemIcon
+        {menuRow?.actions?.map((action: ActionDef, index: number) => (
+          <React.Fragment key={action.handler}>
+            <MenuItem
+              onClick={() => handleActionClick(action.handler)}
               sx={{
-                color: action.type === 'button_delete' ? '#EF4444' : '#6B7280',
-                minWidth: 36
+                color: '#1E1F21',
+                fontSize: '14px',
+                fontWeight: 500,
+                lineHeight: '24px',
+                letterSpacing: '0.4px',
+                py: 1,
+                px: 0,
+                gap: 1,
+                minHeight: 'auto',
+                '&:hover': {
+                  bgcolor: 'transparent'
+                }
               }}
             >
-              {getActionIcon(action.type)}
-            </ListItemIcon>
-            <ListItemText
-              primary={action.label}
-              primaryTypographyProps={{
-                fontSize: '14px',
-                fontWeight: 400
-              }}
-            />
-          </MenuItem>
+              <ListItemIcon
+                sx={{
+                  color: '#8E9098',
+                  minWidth: 'auto',
+                  width: 16,
+                  height: 20,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  '& svg': {
+                    fontSize: 20
+                  }
+                }}
+              >
+                {getActionIcon(action.type)}
+              </ListItemIcon>
+              <ListItemText
+                primary={action.label}
+                primaryTypographyProps={{
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: '24px',
+                  letterSpacing: '0.4px',
+                  color: '#1E1F21'
+                }}
+                sx={{ m: 0 }}
+              />
+            </MenuItem>
+            {index < (menuRow.actions?.length || 0) - 1 && (
+              <Divider
+                sx={{
+                  borderColor: 'rgba(0, 0, 0, 0.12)',
+                  my: '0 !important',
+                  mx: 0
+                }}
+              />
+            )}
+          </React.Fragment>
         ))}
       </Menu>
     </>
