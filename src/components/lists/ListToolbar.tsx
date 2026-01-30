@@ -1,0 +1,619 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Box,
+  Button,
+  TextField,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+  Drawer,
+  FormControl,
+  InputLabel,
+  Select,
+  Divider,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Chip
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SortIcon from '@mui/icons-material/Sort';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import type {
+  SortDef,
+  FilterDef,
+  GeneralActionDef,
+  FiltersState,
+  BulkAction,
+  GenericRecord
+} from '@/types/genericList';
+
+interface ListToolbarProps {
+  // Search
+  search: string;
+  onSearchChange: (value: string) => void;
+
+  // Sort
+  sortable: SortDef[];
+  sortProperty: string;
+  sortOrder: 'asc' | 'desc';
+  onSortChange: (property: string, order: 'asc' | 'desc') => void;
+
+  // Filters
+  filtersDefs: FilterDef[];
+  filters: FiltersState;
+  activeFiltersCount: number;
+  onFilterChange: (key: string, value: string | string[]) => void;
+  onClearFilters: () => void;
+
+  // General Actions
+  generalActions: GeneralActionDef[];
+  onGeneralAction: (handler: string) => void;
+
+  // Bulk Actions
+  bulkActions?: BulkAction[];
+  selectedCount: number;
+  onBulkAction?: (handler: string) => void;
+}
+
+export const ListToolbar = <T extends GenericRecord = GenericRecord>({
+  search,
+  onSearchChange,
+  sortable,
+  sortProperty,
+  sortOrder,
+  onSortChange,
+  filtersDefs,
+  filters,
+  activeFiltersCount,
+  onFilterChange,
+  onClearFilters,
+  generalActions,
+  onGeneralAction,
+  bulkActions,
+  selectedCount,
+  onBulkAction
+}: ListToolbarProps<T>) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Sort menu state
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const sortMenuOpen = Boolean(sortAnchorEl);
+
+  // Filter drawer state
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  // Current sort label
+  const currentSortLabel = useMemo(() => {
+    const currentSort = sortable.find((s) => s.property === sortProperty && s.order === sortOrder);
+    return currentSort?.label || 'Sortowanie';
+  }, [sortable, sortProperty, sortOrder]);
+
+  const handleSortClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSortAnchorEl(event.currentTarget);
+  };
+
+  const handleSortClose = () => {
+    setSortAnchorEl(null);
+  };
+
+  const handleSortSelect = (sort: SortDef) => {
+    onSortChange(sort.property, sort.order);
+    handleSortClose();
+  };
+
+  const handleFilterDrawerToggle = () => {
+    setFilterDrawerOpen(!filterDrawerOpen);
+  };
+
+  // Render filter inputs based on filtersDefs
+  const renderFilterInputs = () => {
+    return filtersDefs.map((filterDef) => {
+      const currentValue = filters[filterDef.key] || (filterDef.is_multiple ? [] : '');
+
+      if (filterDef.type === 'select') {
+        return (
+          <FormControl key={filterDef.key} fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel>{filterDef.label}</InputLabel>
+            <Select
+              value={currentValue}
+              label={filterDef.label}
+              multiple={filterDef.is_multiple}
+              onChange={(e) => onFilterChange(filterDef.key, e.target.value as string | string[])}
+            >
+              {filterDef.options?.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        );
+      }
+
+      // Default text input
+      return (
+        <TextField
+          key={filterDef.key}
+          label={filterDef.label}
+          value={currentValue}
+          onChange={(e) => onFilterChange(filterDef.key, e.target.value)}
+          fullWidth
+          size="small"
+          sx={{ mb: 2 }}
+        />
+      );
+    });
+  };
+
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <Box sx={{ mb: 2 }}>
+        {/* Title row with add button */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          {/* General Actions (mobile: just primary action) */}
+          {generalActions.length > 0 && (
+            <Box sx={{ ml: 'auto' }}>
+              {generalActions
+                .filter((action) => action.type === 'button_primary')
+                .map((action) => (
+                  <Button
+                    key={action.handler}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => onGeneralAction(action.handler)}
+                    sx={{ bgcolor: '#1E1F21', '&:hover': { bgcolor: '#32343A' } }}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+            </Box>
+          )}
+        </Stack>
+
+        {/* Search input */}
+        <TextField
+          placeholder="Szukaj"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          fullWidth
+          size="small"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon sx={{ color: '#8E9098', fontSize: 20 }} />
+              </InputAdornment>
+            )
+          }}
+          sx={{
+            mb: 2,
+            bgcolor: 'background.paper',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+              '& fieldset': {
+                borderColor: '#E5E7EB'
+              }
+            }
+          }}
+        />
+
+        {/* Sort and Filter row */}
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+          {/* Sort button (Alfabetycznie) */}
+          <Button
+            variant="outlined"
+            startIcon={<SortIcon sx={{ fontSize: 18 }} />}
+            onClick={handleSortClick}
+            fullWidth
+            sx={{
+              color: '#32343A',
+              textTransform: 'none',
+              borderColor: '#E5E7EB',
+              borderRadius: '8px',
+              fontWeight: 400,
+              fontSize: '14px',
+              justifyContent: 'flex-start',
+              px: 2,
+              py: 1.25,
+              bgcolor: 'white',
+              '&:hover': {
+                borderColor: '#D0D5DD',
+                bgcolor: '#FAFAFA'
+              }
+            }}
+          >
+            {currentSortLabel === 'Sortowanie' ? 'Alfabetycznie' : currentSortLabel}
+          </Button>
+
+          {/* Filter button */}
+          <Button
+            variant="outlined"
+            startIcon={<FilterListIcon sx={{ fontSize: 18 }} />}
+            onClick={handleFilterDrawerToggle}
+            fullWidth
+            sx={{
+              color: '#32343A',
+              textTransform: 'none',
+              borderColor: '#E5E7EB',
+              borderRadius: '8px',
+              fontWeight: 400,
+              fontSize: '14px',
+              justifyContent: 'flex-start',
+              px: 2,
+              py: 1.25,
+              bgcolor: 'white',
+              '&:hover': {
+                borderColor: '#D0D5DD',
+                bgcolor: '#FAFAFA'
+              }
+            }}
+            endIcon={
+              activeFiltersCount > 0 ? (
+                <Box
+                  sx={{
+                    bgcolor: '#1E1F21',
+                    color: 'white',
+                    borderRadius: '12px',
+                    minWidth: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    px: 0.75,
+                    ml: 'auto'
+                  }}
+                >
+                  {activeFiltersCount}
+                </Box>
+              ) : null
+            }
+          >
+            Filtry
+          </Button>
+        </Stack>
+
+        {/* Bulk actions bar (when items selected) */}
+        {selectedCount > 0 && bulkActions && bulkActions.length > 0 && (
+          <Box sx={{ mt: 2, p: 2, bgcolor: '#F5F5F5', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {selectedCount} pozycji zaznaczonych
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              {bulkActions.map((action) => (
+                <Button
+                  key={action.handler}
+                  variant={action.variant === 'primary' ? 'contained' : 'outlined'}
+                  size="small"
+                  onClick={() => onBulkAction?.(action.handler)}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+        )}
+
+        {/* Sort Menu */}
+        <Menu
+          anchorEl={sortAnchorEl}
+          open={sortMenuOpen}
+          onClose={handleSortClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          {sortable.map((sort, index) => (
+            <MenuItem
+              key={`${sort.property}-${sort.order}-${index}`}
+              onClick={() => handleSortSelect(sort)}
+              selected={sort.property === sortProperty && sort.order === sortOrder}
+            >
+              {sort.label}
+            </MenuItem>
+          ))}
+        </Menu>
+
+        {/* Filter Drawer */}
+        <Drawer
+          anchor="bottom"
+          open={filterDrawerOpen}
+          onClose={handleFilterDrawerToggle}
+          sx={{
+            '& .MuiDrawer-paper': {
+              borderRadius: '20px 20px 0 0',
+              p: 3,
+              maxHeight: '80vh'
+            }
+          }}
+        >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6">Filtry</Typography>
+            <IconButton onClick={handleFilterDrawerToggle}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+
+          {renderFilterInputs()}
+
+          <Divider sx={{ my: 2 }} />
+
+          <Stack direction="row" spacing={2}>
+            <Button variant="outlined" fullWidth onClick={onClearFilters}>
+              Wyczyść
+            </Button>
+            <Button variant="contained" fullWidth onClick={handleFilterDrawerToggle}>
+              Zastosuj
+            </Button>
+          </Stack>
+        </Drawer>
+      </Box>
+    );
+  }
+
+  // Desktop layout
+  return (
+    <Box>
+      {/* Top row: Search + Sort + Filter + Actions */}
+      <Stack direction="row" alignItems="center" spacing={2}>
+        {/* Search */}
+        <TextField
+          placeholder="Szukaj"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          size="small"
+          sx={{
+            width: 300,
+            bgcolor: 'background.paper',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+              '& fieldset': {
+                borderColor: '#E5E7EB'
+              },
+              '&:hover fieldset': {
+                borderColor: '#D0D5DD'
+              }
+            }
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#8E9098', fontSize: 20 }} />
+              </InputAdornment>
+            )
+          }}
+        />
+
+        <Box sx={{ flex: 1 }} />
+
+        {/* Filter button with badge */}
+        <Button
+          startIcon={<FilterListIcon sx={{ fontSize: 18 }} />}
+          onClick={handleFilterDrawerToggle}
+          variant="outlined"
+          sx={{
+            color: '#32343A',
+            textTransform: 'none',
+            borderColor: '#E5E7EB',
+            borderRadius: '8px',
+            fontWeight: 400,
+            fontSize: '14px',
+            px: 2,
+            bgcolor: 'white',
+            '&:hover': {
+              borderColor: '#D0D5DD',
+              bgcolor: '#FAFAFA'
+            }
+          }}
+          endIcon={
+            activeFiltersCount > 0 ? (
+              <Box
+                sx={{
+                  bgcolor: '#1E1F21',
+                  color: 'white',
+                  borderRadius: '12px',
+                  minWidth: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  px: 0.75,
+                  ml: 0.5
+                }}
+              >
+                {activeFiltersCount}
+              </Box>
+            ) : null
+          }
+        >
+          Filtry
+        </Button>
+
+        {/* Sort button */}
+        <Button
+          startIcon={<SortIcon sx={{ fontSize: 18 }} />}
+          onClick={handleSortClick}
+          variant="outlined"
+          sx={{
+            color: '#32343A',
+            textTransform: 'none',
+            borderColor: '#E5E7EB',
+            borderRadius: '8px',
+            fontWeight: 400,
+            fontSize: '14px',
+            px: 2,
+            bgcolor: 'white',
+            '&:hover': {
+              borderColor: '#D0D5DD',
+              bgcolor: '#FAFAFA'
+            }
+          }}
+        >
+          Sortuj
+        </Button>
+
+        {/* General Actions */}
+        {generalActions.map((action) => (
+          <Button
+            key={action.handler}
+            variant={action.type === 'button_primary' ? 'contained' : 'outlined'}
+            startIcon={
+              action.type === 'button_primary' ? <AddIcon sx={{ fontSize: 18 }} /> : undefined
+            }
+            onClick={() => onGeneralAction(action.handler)}
+            sx={{
+              textTransform: 'none',
+              borderRadius: '8px',
+              fontWeight: 500,
+              fontSize: '14px',
+              px: 2.5,
+              ...(action.type === 'button_primary'
+                ? {
+                    bgcolor: '#1E1F21',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: '#32343A'
+                    }
+                  }
+                : {
+                    borderColor: '#E5E7EB',
+                    color: '#32343A',
+                    bgcolor: 'white',
+                    '&:hover': {
+                      borderColor: '#D0D5DD',
+                      bgcolor: '#FAFAFA'
+                    }
+                  })
+            }}
+          >
+            {action.label}
+          </Button>
+        ))}
+      </Stack>
+
+      {/* Bulk actions row */}
+      {(selectedCount > 0 || (bulkActions && bulkActions.length > 0)) && (
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: 2 }}>
+          {/* Bulk action buttons */}
+          {bulkActions && bulkActions.length > 0 && selectedCount > 0 && (
+            <Stack direction="row" spacing={1}>
+              {bulkActions.map((action) => (
+                <Button
+                  key={action.handler}
+                  variant="outlined"
+                  size="small"
+                  startIcon={action.icon}
+                  onClick={() => onBulkAction?.(action.handler)}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </Stack>
+          )}
+
+          <Box sx={{ flex: 1 }} />
+
+          {/* Selected count */}
+          {selectedCount > 0 && (
+            <Typography variant="body2" color="text.secondary">
+              {selectedCount} pozycje zaznaczone
+            </Typography>
+          )}
+        </Stack>
+      )}
+
+      {/* Active filters chips */}
+      {activeFiltersCount > 0 && (
+        <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap">
+          {Object.entries(filters).map(([key, value]) => {
+            if (!value || (Array.isArray(value) && value.length === 0)) return null;
+            const filterDef = filtersDefs.find((f) => f.key === key);
+            const label = filterDef?.label || key;
+            const displayValue = Array.isArray(value) ? value.join(', ') : value;
+
+            return (
+              <Chip
+                key={key}
+                label={`${label}: ${displayValue}`}
+                onDelete={() => onFilterChange(key, filterDef?.is_multiple ? [] : '')}
+                size="small"
+                sx={{ mb: 1 }}
+              />
+            );
+          })}
+          <Chip
+            label="Wyczyść wszystkie"
+            onClick={onClearFilters}
+            size="small"
+            variant="outlined"
+            sx={{ mb: 1 }}
+          />
+        </Stack>
+      )}
+
+      {/* Sort Menu */}
+      <Menu
+        anchorEl={sortAnchorEl}
+        open={sortMenuOpen}
+        onClose={handleSortClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        {sortable.map((sort, index) => (
+          <MenuItem
+            key={`${sort.property}-${sort.order}-${index}`}
+            onClick={() => handleSortSelect(sort)}
+            selected={sort.property === sortProperty && sort.order === sortOrder}
+          >
+            {sort.label}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Filter Drawer (desktop - right side) */}
+      <Drawer
+        anchor="right"
+        open={filterDrawerOpen}
+        onClose={handleFilterDrawerToggle}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 320,
+            p: 3
+          }
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h6">Filtry</Typography>
+          <IconButton onClick={handleFilterDrawerToggle}>
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+
+        {renderFilterInputs()}
+
+        <Divider sx={{ my: 2 }} />
+
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" fullWidth onClick={onClearFilters}>
+            Wyczyść
+          </Button>
+          <Button variant="contained" fullWidth onClick={handleFilterDrawerToggle}>
+            Zastosuj
+          </Button>
+        </Stack>
+      </Drawer>
+    </Box>
+  );
+};
+
+export default ListToolbar;
