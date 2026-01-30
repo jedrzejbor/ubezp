@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   PASSWORD_REQUEST: '/api/request',
   PASSWORD_CHANGE: '/api/change',
   // Generic list endpoints
-  USERS_TABLE: '/api/users-table'
+  USERS_TABLE: '/api/resource/users'
   // Tutaj dodawaj kolejne endpointy
 } as const;
 
