@@ -78,11 +78,11 @@ const UsersPage: React.FC = () => {
   // Combined handlers map
   const handlers = {
     // Row actions (from backend actions[])
-    'view-user': handleViewUser,
-    'edit-user': handleEditUser,
-    'delete-user': handleDeleteUser,
+    view: handleViewUser,
+    edit: handleEditUser,
+    delete: handleDeleteUser,
     // General actions (from backend generalActions[])
-    'create-user': handleCreateUser
+    create: handleCreateUser
   };
 
   // Bulk handlers map
@@ -102,7 +102,7 @@ const UsersPage: React.FC = () => {
 
   return (
     <Box>
-      <PageTitle title="Użytkownicy" />
+      <PageTitle>Użytkownicy</PageTitle>
 
       <GenericListView<UserRecord>
         title="Lista Użytkowników"
