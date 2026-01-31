@@ -5,7 +5,6 @@ import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { GenericListView } from '@/components/lists';
 import { fetchUsersTable, deleteUser, UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
-import PageTitle from '@/components/PageTitle';
 
 const UsersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -102,8 +101,6 @@ const UsersPage: React.FC = () => {
 
   return (
     <Box>
-      <PageTitle>Użytkownicy</PageTitle>
-
       <GenericListView<UserRecord>
         title="Lista Użytkowników"
         fetcher={fetchUsersTable}
