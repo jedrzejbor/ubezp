@@ -86,7 +86,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
   } = controller;
 
   // Calculate selected count
-  const selectedCount = selectedIds.length;
+  const selectedCount = selectedIds.size;
 
   // Get row ID helper
   const getRowId = useCallback(
@@ -151,7 +151,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
   if (error) {
     return (
       <Box>
-        <PageTitle title={title} />
+        <PageTitle>{title}</PageTitle>
         <Alert
           severity="error"
           action={
@@ -170,7 +170,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
   return (
     <Box>
       {/* Page Title (mobile only - desktop has it in breadcrumbs) */}
-      {isMobile && <PageTitle title={title} />}
+      {isMobile && <PageTitle>{title}</PageTitle>}
 
       {/* Desktop: White container with title, toolbar, table, and pagination */}
       {!isMobile && meta ? (
@@ -516,6 +516,13 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
               const currentValue = filters[filterDef.key] || (filterDef.is_multiple ? [] : '');
 
               if (filterDef.type === 'select') {
+                // Normalize options to array (backend can send object or array)
+                const optionsArray = Array.isArray(filterDef.options)
+                  ? filterDef.options
+                  : filterDef.options
+                    ? Object.values(filterDef.options)
+                    : [];
+
                 return (
                   <FormControl key={filterDef.key} fullWidth size="small" sx={{ mb: 2 }}>
                     <InputLabel>{filterDef.label}</InputLabel>
@@ -527,7 +534,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                         setFilter(filterDef.key, e.target.value as string | string[])
                       }
                     >
-                      {filterDef.options?.map((option) => (
+                      {optionsArray.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
                         </MenuItem>
