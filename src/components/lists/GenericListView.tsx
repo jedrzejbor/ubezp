@@ -533,6 +533,15 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                       onChange={(e) =>
                         setFilter(filterDef.key, e.target.value as string | string[])
                       }
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            bgcolor: 'white',
+                            boxShadow:
+                              '0px 4px 6px -2px rgba(0, 0, 0, 0.05), 0px 10px 15px -3px rgba(0, 0, 0, 0.10)'
+                          }
+                        }
+                      }}
                     >
                       {optionsArray.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
