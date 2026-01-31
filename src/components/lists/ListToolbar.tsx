@@ -28,8 +28,7 @@ import type {
   FilterDef,
   GeneralActionDef,
   FiltersState,
-  BulkAction,
-  GenericRecord
+  BulkAction
 } from '@/types/genericList';
 
 interface ListToolbarProps {
@@ -60,7 +59,7 @@ interface ListToolbarProps {
   onBulkAction?: (handler: string) => void;
 }
 
-export const ListToolbar = <T extends GenericRecord = GenericRecord>({
+export const ListToolbar = ({
   search,
   onSearchChange,
   sortable,
@@ -77,7 +76,7 @@ export const ListToolbar = <T extends GenericRecord = GenericRecord>({
   bulkActions,
   selectedCount,
   onBulkAction
-}: ListToolbarProps<T>) => {
+}: ListToolbarProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -117,6 +116,13 @@ export const ListToolbar = <T extends GenericRecord = GenericRecord>({
       const currentValue = filters[filterDef.key] || (filterDef.is_multiple ? [] : '');
 
       if (filterDef.type === 'select') {
+        // Normalize options to array (backend can send object or array)
+        const optionsArray = Array.isArray(filterDef.options)
+          ? filterDef.options
+          : filterDef.options
+            ? Object.values(filterDef.options)
+            : [];
+
         return (
           <FormControl key={filterDef.key} fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel>{filterDef.label}</InputLabel>
@@ -126,7 +132,7 @@ export const ListToolbar = <T extends GenericRecord = GenericRecord>({
               multiple={filterDef.is_multiple}
               onChange={(e) => onFilterChange(filterDef.key, e.target.value as string | string[])}
             >
-              {filterDef.options?.map((option) => (
+              {optionsArray.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
