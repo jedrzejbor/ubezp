@@ -33,7 +33,7 @@ export interface FilterDef {
   type: 'select' | 'text' | 'date' | 'date_range';
   key: string;
   label: string;
-  options?: FilterOption[];
+  options?: FilterOption[] | Record<string, FilterOption>;
   is_multiple: boolean;
 }
 
