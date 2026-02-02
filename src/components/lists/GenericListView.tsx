@@ -198,9 +198,9 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
               <Typography
                 variant="h5"
                 sx={{
-                  fontSize: '24px',
-                  fontWeight: 400,
-                  lineHeight: '32px',
+                  fontSize: '32px',
+                  fontWeight: 300,
+                  lineHeight: '44px',
                   color: '#1E1F21'
                 }}
               >
