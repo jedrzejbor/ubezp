@@ -187,7 +187,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
           }}
         >
           {/* Header section with title and toolbar */}
-          <Box sx={{ p: 3, pb: 2, borderBottom: '1px solid #E5E7EB' }}>
+          <Box sx={{ p: 3, pb: 2 }}>
             {/* Title row with Add button */}
             <Stack
               direction="row"
