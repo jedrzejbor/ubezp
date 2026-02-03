@@ -111,6 +111,8 @@ const renderCell = <T extends GenericRecord>(column: ColumnDef, row: T) => {
           sx={{
             color: 'text.primary',
             textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: 400,
             '&:hover': { textDecoration: 'underline' }
           }}
         >
@@ -125,6 +127,8 @@ const renderCell = <T extends GenericRecord>(column: ColumnDef, row: T) => {
           sx={{
             color: 'text.primary',
             textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: 400,
             '&:hover': { textDecoration: 'underline' }
           }}
         >
@@ -133,7 +137,11 @@ const renderCell = <T extends GenericRecord>(column: ColumnDef, row: T) => {
       );
 
     case 'full_name':
-      return <Typography sx={{ fontWeight: 500, color: '#32343A' }}>{stringValue}</Typography>;
+      return (
+        <Typography sx={{ fontWeight: 400, fontSize: '14px', color: '#32343A' }}>
+          {stringValue}
+        </Typography>
+      );
 
     case 'status':
     case 'badge': {
