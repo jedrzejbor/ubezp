@@ -10,6 +10,7 @@ import UsersPage from '@/pages/UsersPage';
 import ResetPasswordTokenPage from '@/pages/ResetPasswordTokenPage';
 import AppErrorBoundary from '@/routes/AppErrorBoundary';
 import ProtectedRoute from '@/routes/ProtectedRoute';
+import PublicRoute from '@/routes/PublicRoute';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 import { useAuthStore } from '@/store/authStore';
@@ -33,19 +34,35 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/login',
-        element: <LoginPage />
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        )
       },
       {
         path: '/reset-password',
-        element: <LoginPage initialStage="forgot" />
+        element: (
+          <PublicRoute>
+            <LoginPage initialStage="forgot" />
+          </PublicRoute>
+        )
       },
       {
         path: '/reset/:token',
-        element: <ResetPasswordTokenPage />
+        element: (
+          <PublicRoute>
+            <ResetPasswordTokenPage />
+          </PublicRoute>
+        )
       },
       {
         path: '/verify',
-        element: <TwoFactorAuthPage />
+        element: (
+          <PublicRoute>
+            <TwoFactorAuthPage />
+          </PublicRoute>
+        )
       }
     ]
   },
