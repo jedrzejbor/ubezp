@@ -175,20 +175,67 @@ const renderCell = <T extends GenericRecord>(column: ColumnDef, row: T) => {
           <Chip
             label={stringValue}
             size="small"
-            variant="outlined"
+            variant="filled"
             sx={{
-              borderRadius: '6px',
+              borderRadius: '20px',
               fontWeight: 400,
               fontSize: '12px',
-              borderColor: '#E5E7EB',
-              color: '#6B7280',
-              height: '24px',
-              bgcolor: 'transparent'
+              textTransform: 'capitalize',
+              color: '#111827',
+              height: 28,
+              bgcolor: '#F3F4F6',
+              px: '0',
+              lineHeight: '18px'
             }}
           />
         );
       }
-      return <Typography sx={{ fontSize: '14px', color: '#32343A' }}>{stringValue}</Typography>;
+      return (
+        // <Typography sx={{ fontSize: '14px', color: '#32343A', px: 0 }}>{stringValue}</Typography>
+        // <Chip
+        //   label={stringValue}
+        //   size="small"
+        //   variant="filled"
+        //   sx={{
+        //     borderRadius: '20px',
+        //     fontWeight: 400,
+        //     fontSize: '12px',
+        //     textTransform: 'capitalize',
+        //     color: '#111827',
+        //     height: 28,
+        //     bgcolor: '#F3F4F6',
+        //     px: '0',
+        //     lineHeight: '18px'
+        //   }}
+        // />
+
+        <Chip
+          label={stringValue}
+          size="small"
+          sx={{
+            bgcolor: '#E8F5E9',
+            color: '#2E7D32',
+            fontWeight: 400,
+            fontSize: '12px',
+            height: '20px',
+            padding: '3px 8px',
+            '& .MuiChip-icon': { mr: '6px', ml: 0 },
+            '& .MuiChip-label': { px: 0 }
+          }}
+          icon={
+            <Box
+              component="span"
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                bgcolor: '#4CAF50',
+                ml: 1
+              }}
+            />
+          }
+        />
+      );
   }
 };
 
@@ -204,6 +251,8 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
   onRowAction,
   getRowId
 }: DesktopTableRendererProps<T>) => {
+  const showSelection = false;
+
   // Row action menu state
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuRow, setMenuRow] = useState<T | null>(null);
@@ -236,9 +285,11 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox disabled />
-              </TableCell>
+              {showSelection && (
+                <TableCell padding="checkbox">
+                  <Checkbox disabled />
+                </TableCell>
+              )}
               {columns
                 .filter((c) => c.type !== 'actions')
                 .map((col, index) => (
@@ -252,9 +303,11 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
           <TableBody>
             {[...Array(5)].map((_, rowIndex) => (
               <TableRow key={rowIndex}>
-                <TableCell padding="checkbox">
-                  <Checkbox disabled />
-                </TableCell>
+                {showSelection && (
+                  <TableCell padding="checkbox">
+                    <Checkbox disabled />
+                  </TableCell>
+                )}
                 {columns
                   .filter((c) => c.type !== 'actions')
                   .map((_, colIndex) => (
@@ -299,41 +352,51 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
       >
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#FAFAFA', height: 48 }}>
-              <TableCell
-                padding="checkbox"
-                sx={{
-                  width: 48,
-                  pl: 2.5
-                }}
-              >
-                <Checkbox
-                  checked={allSelected ?? false}
-                  indeterminate={someSelected ?? false}
-                  onChange={onToggleAllSelection}
+            <TableRow
+              sx={{
+                bgcolor: '#FFFFFF',
+                height: 48,
+                borderBottom: '1px solid #D0D5DD'
+              }}
+            >
+              {showSelection && (
+                <TableCell
+                  padding="checkbox"
                   sx={{
-                    color: '#D0D5DD',
-                    '&.Mui-checked': {
-                      color: '#1E1F21'
-                    },
-                    '&.MuiCheckbox-indeterminate': {
-                      color: '#1E1F21'
-                    }
+                    width: 48,
+                    pl: 2.5
                   }}
-                />
-              </TableCell>
+                >
+                  <Checkbox
+                    checked={allSelected ?? false}
+                    indeterminate={someSelected ?? false}
+                    onChange={onToggleAllSelection}
+                    sx={{
+                      color: '#D0D5DD',
+                      '&.Mui-checked': {
+                        color: '#1E1F21'
+                      },
+                      '&.MuiCheckbox-indeterminate': {
+                        color: '#1E1F21'
+                      }
+                    }}
+                  />
+                </TableCell>
+              )}
               {visibleColumns.map((column, index) => (
                 <TableCell
                   key={column.property || index}
                   sx={{
                     fontWeight: 500,
-                    fontSize: '11px',
+                    fontSize: '12px',
+                    fontFamily: 'Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif',
+                    lineHeight: '18px',
                     color: '#74767F',
                     py: 1.5,
                     px: 2,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    borderBottom: '1px solid #E5E7EB',
+                    borderBottom: '1px solid #D0D5DD',
                     height: 48
                   }}
                 >
@@ -346,7 +409,7 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
           <TableBody>
             {data.map((row) => {
               const rowId = getRowId(row);
-              const isSelected = selectedIds ? selectedIds.has(rowId) : false;
+              const isSelected = showSelection && selectedIds ? selectedIds.has(rowId) : false;
 
               return (
                 <TableRow
@@ -367,18 +430,20 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
                     cursor: 'pointer'
                   }}
                 >
-                  <TableCell padding="checkbox" sx={{ pl: 2.5 }}>
-                    <Checkbox
-                      checked={isSelected ?? false}
-                      onChange={() => onToggleRowSelection(row)}
-                      sx={{
-                        color: '#D0D5DD',
-                        '&.Mui-checked': {
-                          color: '#1E1F21'
-                        }
-                      }}
-                    />
-                  </TableCell>
+                  {showSelection && (
+                    <TableCell padding="checkbox" sx={{ pl: 2.5 }}>
+                      <Checkbox
+                        checked={isSelected ?? false}
+                        onChange={() => onToggleRowSelection(row)}
+                        sx={{
+                          color: '#D0D5DD',
+                          '&.Mui-checked': {
+                            color: '#1E1F21'
+                          }
+                        }}
+                      />
+                    </TableCell>
+                  )}
                   {visibleColumns.map((column, index) => (
                     <TableCell
                       key={column.property || index}
