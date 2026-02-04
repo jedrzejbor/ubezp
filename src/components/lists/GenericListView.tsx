@@ -291,19 +291,24 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                       sx={{
                         bgcolor: '#1E1F21',
                         color: 'white',
-                        borderRadius: '12px',
-                        minWidth: '20px',
+                        borderRadius: '4px',
+                        width: '20px',
                         height: '20px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        px: 0.75,
                         ml: 0.5
                       }}
                     >
-                      {activeFiltersCount}
+                      <Typography
+                        sx={{
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          lineHeight: '20px'
+                        }}
+                      >
+                        {activeFiltersCount}
+                      </Typography>
                     </Box>
                   ) : null
                 }
