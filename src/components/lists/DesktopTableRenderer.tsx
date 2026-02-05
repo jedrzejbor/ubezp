@@ -364,7 +364,7 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
               sx={{
                 bgcolor: '#FFFFFF',
                 height: 48,
-                borderBottom: '1px solid #D0D5DD'
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
               }}
             >
               {showSelection && (
@@ -372,7 +372,8 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
                   padding="checkbox"
                   sx={{
                     width: 48,
-                    pl: 2.5
+                    pl: 2.5,
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
                   }}
                 >
                   <Checkbox
@@ -404,18 +405,26 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
                     px: 2,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    borderBottom: '1px solid #D0D5DD',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
                     height: 48
                   }}
                 >
                   {column.label}
                 </TableCell>
               ))}
-              {hasActions && <TableCell align="right" sx={{ width: 60 }} />}
+              {hasActions && (
+                <TableCell
+                  align="right"
+                  sx={{
+                    width: 60,
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
+                  }}
+                />
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row) => {
+            {data.map((row, index) => {
               const rowId = getRowId(row);
               const isSelected = showSelection && selectedIds ? selectedIds.has(rowId) : false;
 
@@ -426,6 +435,7 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
                   selected={isSelected}
                   sx={{
                     height: 72,
+                    bgcolor: index % 2 === 0 ? '#FBF9F9' : 'transparent',
                     '&.Mui-selected': {
                       bgcolor: 'rgba(143, 109, 95, 0.04)'
                     },
@@ -433,7 +443,7 @@ export const DesktopTableRenderer = <T extends GenericRecord = GenericRecord>({
                       bgcolor: 'rgba(0, 0, 0, 0.02)'
                     },
                     '& td': {
-                      borderBottom: '1px solid #F0F0F0'
+                      borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
                     },
                     cursor: 'pointer'
                   }}
