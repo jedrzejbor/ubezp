@@ -323,7 +323,8 @@ export const ListToolbar = ({
           PaperProps={{
             sx: {
               bgcolor: '#FFFFFF',
-              borderRadius: '8px',
+              borderRadius: '12px',
+              border: '1px solid rgba(0, 0, 0, 0.12)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               minWidth: 180
             }
@@ -334,6 +335,32 @@ export const ListToolbar = ({
               key={`${sort.property}-${sort.order}-${index}`}
               onClick={() => handleSortSelect(sort)}
               selected={sort.property === sortProperty && sort.order === sortOrder}
+              sx={{
+                py: 1.5,
+                px: 2,
+                position: 'relative',
+                '&:hover': {
+                  bgcolor: '#F9FAFB'
+                },
+                '&.Mui-selected': {
+                  bgcolor: '#F9FAFB',
+                  '&:hover': {
+                    bgcolor: '#F9FAFB'
+                  }
+                },
+                '&::after':
+                  index < sortable.length - 1
+                    ? {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: '16px',
+                        right: '16px',
+                        height: '1px',
+                        bgcolor: 'rgba(0, 0, 0, 0.12)'
+                      }
+                    : {}
+              }}
             >
               {sort.label}
             </MenuItem>
@@ -593,12 +620,16 @@ export const ListToolbar = ({
         onClose={handleSortClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: {
-            bgcolor: '#FFFFFF',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            minWidth: 180
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: '#FFFFFF',
+              borderRadius: '12px',
+              border: '1px solid rgba(0, 0, 0, 0.12)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              minWidth: 180,
+              overflow: 'visible'
+            }
           }
         }}
       >
@@ -607,6 +638,32 @@ export const ListToolbar = ({
             key={`${sort.property}-${sort.order}-${index}`}
             onClick={() => handleSortSelect(sort)}
             selected={sort.property === sortProperty && sort.order === sortOrder}
+            sx={{
+              py: 1.5,
+              px: 2,
+              position: 'relative',
+              '&:hover': {
+                bgcolor: '#F9FAFB'
+              },
+              '&.Mui-selected': {
+                bgcolor: '#F9FAFB',
+                '&:hover': {
+                  bgcolor: '#F9FAFB'
+                }
+              },
+              '&::after':
+                index < sortable.length - 1
+                  ? {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '16px',
+                      right: '16px',
+                      height: '1px',
+                      bgcolor: 'rgba(0, 0, 0, 0.12)'
+                    }
+                  : {}
+            }}
           >
             {sort.label}
           </MenuItem>

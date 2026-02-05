@@ -461,7 +461,9 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
             PaperProps={{
               sx: {
                 bgcolor: 'white',
-                borderRadius: '8px',
+                // borderRadius: '8px',
+                borderRadius: '12px',
+                border: '1px solid rgba(0, 0, 0, 0.12)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 minWidth: 200,
                 mt: 0.5
@@ -478,11 +480,30 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                 selected={sort.property === sortProperty && sort.order === sortOrder}
                 sx={{
                   fontSize: '14px',
-                  py: 1.25,
+                  py: 1.5,
                   px: 2,
+                  position: 'relative',
                   '&:hover': {
                     bgcolor: '#F9FAFB'
-                  }
+                  },
+                  '&.Mui-selected': {
+                    bgcolor: '#F9FAFB',
+                    '&:hover': {
+                      bgcolor: '#F9FAFB'
+                    }
+                  },
+                  '&::after':
+                    index < meta.sortable.length - 1
+                      ? {
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 0,
+                          left: '16px',
+                          right: '16px',
+                          height: '1px',
+                          bgcolor: 'rgba(0, 0, 0, 0.12)'
+                        }
+                      : {}
                 }}
               >
                 {sort.label}
