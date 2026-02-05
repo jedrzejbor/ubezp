@@ -611,7 +611,8 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
               bgcolor: '#FFFFFF',
               borderRadius: '12px',
               overflow: 'hidden',
-              p: 2
+              p: 2,
+              mb: '76px' /* leave space for bottom navigation on mobile */
             }}
           >
             {/* Title + Add button in same row */}
