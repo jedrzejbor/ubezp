@@ -37,15 +37,17 @@ const buildQueryString = (params: FetcherParams): string => {
   }
 
   // Filters - backend expects filters[key]=value format
+  // Multi-select values should be comma-separated: filters[firstname]=Marcin,Krzysztof
   Object.entries(params.filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       if (Array.isArray(value)) {
-        // For multiple values, send as comma-separated
-        if (value.length > 0) {
-          query.set(`filters[${key}]`, value.join(','));
+        // For multiple values, send as comma-separated in single parameter
+        const nonEmptyValues = value.filter((v) => v !== undefined && v !== null && v !== '');
+        if (nonEmptyValues.length > 0) {
+          query.set(`filters[${key}]`, nonEmptyValues.join(','));
         }
       } else {
-        query.set(`filters[${key}]`, value);
+        query.set(`filters[${key}]`, String(value));
       }
     }
   });
@@ -61,6 +63,9 @@ export const fetchUsersTable = async (
 ): Promise<GenericListResponse<UserRecord>> => {
   const queryString = buildQueryString(params);
   const endpoint = `${API_ENDPOINTS.USERS_TABLE}?${queryString}`;
+  // Helpful for debugging: log full endpoint when devtools are enabled
+
+  if (process.env.NODE_ENV !== 'production') console.debug('[usersService] GET', endpoint);
 
   return apiClient.get<GenericListResponse<UserRecord>>(endpoint);
 };
