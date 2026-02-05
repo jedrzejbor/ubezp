@@ -169,8 +169,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
 
   return (
     <Box>
-      {/* Page Title (mobile only - desktop has it in breadcrumbs) */}
-      {isMobile && <PageTitle>{title}</PageTitle>}
+      {/* Page Title removed for mobile - using inner wrapper title */}
 
       {/* Desktop: White container with title, toolbar, table, and pagination */}
       {!isMobile && meta ? (
@@ -276,7 +275,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                   textTransform: 'none',
                   borderColor: '#E5E7EB',
                   borderRadius: '8px',
-                  fontWeight: 400,
+                  fontWeight: 500,
                   fontSize: '14px',
                   px: 2,
                   bgcolor: 'white',
@@ -326,7 +325,7 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                   textTransform: 'none',
                   borderColor: '#E5E7EB',
                   borderRadius: '8px',
-                  fontWeight: 400,
+                  fontWeight: 500,
                   fontSize: '14px',
                   px: 2,
                   bgcolor: 'white',
@@ -585,48 +584,104 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
         </Box>
       ) : (
         <>
-          {/* Mobile layout */}
-          {meta && (
-            <ListToolbar
-              search={search}
-              onSearchChange={setSearch}
-              sortable={meta.sortable}
-              sortProperty={sortProperty}
-              sortOrder={sortOrder}
-              onSortChange={setSort}
-              filtersDefs={meta.filtersDefs}
-              filters={filters}
-              activeFiltersCount={activeFiltersCount}
-              onFilterChange={setFilter}
-              onClearFilters={clearFilters}
-              generalActions={meta.generalActions}
-              onGeneralAction={handleGeneralAction}
-              bulkActions={bulkActions}
-              selectedCount={selectedRows.length}
-              onBulkAction={handleBulkAction}
-            />
-          )}
+          {/* Mobile layout - white wrapper */}
+          <Box
+            sx={{
+              bgcolor: '#FFFFFF',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              p: 2
+            }}
+          >
+            {/* Title + Add button in same row */}
+            {meta && (
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 2 }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontSize: '20px',
+                    fontWeight: 300,
+                    lineHeight: '28px',
+                    color: '#1E1F21'
+                  }}
+                >
+                  {title}
+                </Typography>
 
-          <MobileCardListRenderer
-            columns={meta?.columnDefs || []}
-            data={data}
-            loading={loading}
-            onRowAction={handleRowAction}
-            getRowId={getRowId}
-          />
+                {meta.generalActions
+                  .filter((action) => action.type === 'button_primary')
+                  .map((action) => (
+                    <Button
+                      key={action.handler}
+                      variant="contained"
+                      startIcon={<AddIcon sx={{ fontSize: 18 }} />}
+                      onClick={() => handleGeneralAction(action.handler)}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        px: 2,
+                        bgcolor: '#1E1F21',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: '#32343A'
+                        }
+                      }}
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
+              </Stack>
+            )}
 
-          {/* Mobile Pagination */}
-          {paginationInfo && paginationInfo.pages > 1 && (
-            <Stack direction="column" alignItems="center" spacing={2} sx={{ mt: 3 }}>
-              <Pagination
-                count={paginationInfo.pages}
-                page={page}
-                onChange={(_, newPage) => setPage(newPage)}
-                color="primary"
-                shape="rounded"
+            {meta && (
+              <ListToolbar
+                search={search}
+                onSearchChange={setSearch}
+                sortable={meta.sortable}
+                sortProperty={sortProperty}
+                sortOrder={sortOrder}
+                onSortChange={setSort}
+                filtersDefs={meta.filtersDefs}
+                filters={filters}
+                activeFiltersCount={activeFiltersCount}
+                onFilterChange={setFilter}
+                onClearFilters={clearFilters}
+                generalActions={[]} // Don't show general actions in toolbar - we show them above
+                onGeneralAction={handleGeneralAction}
+                bulkActions={bulkActions}
+                selectedCount={selectedRows.length}
+                onBulkAction={handleBulkAction}
               />
-            </Stack>
-          )}
+            )}
+
+            <MobileCardListRenderer
+              columns={meta?.columnDefs || []}
+              data={data}
+              loading={loading}
+              onRowAction={handleRowAction}
+              getRowId={getRowId}
+            />
+
+            {/* Mobile Pagination */}
+            {paginationInfo && paginationInfo.pages > 1 && (
+              <Stack direction="column" alignItems="center" spacing={2} sx={{ mt: 3 }}>
+                <Pagination
+                  count={paginationInfo.pages}
+                  page={page}
+                  onChange={(_, newPage) => setPage(newPage)}
+                  color="primary"
+                  shape="rounded"
+                />
+              </Stack>
+            )}
+          </Box>
         </>
       )}
     </Box>

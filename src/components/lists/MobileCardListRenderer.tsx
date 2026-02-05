@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Stack,
   Typography,
   IconButton,
   Chip,
   Skeleton,
   Menu,
-  MenuItem
+  MenuItem,
+  Divider
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import type { ColumnDef, GenericRecord, ActionDef } from '@/types/genericList';
@@ -22,18 +21,39 @@ interface MobileCardListRendererProps<T extends GenericRecord = GenericRecord> {
   getRowId: (row: T) => string;
 }
 
-// Get status chip color
-const getStatusColor = (status: string): 'success' | 'error' | 'warning' | 'info' | 'default' => {
+// Get status chip styles
+const getStatusChipStyles = (status: string) => {
   const lowerStatus = status?.toLowerCase() || '';
-  if (lowerStatus.includes('aktywny') || lowerStatus.includes('active')) return 'success';
+  if (lowerStatus.includes('aktywny') || lowerStatus.includes('active')) {
+    return {
+      bgcolor: '#ECFDF3',
+      color: '#027A48',
+      dotColor: '#12B76A'
+    };
+  }
   if (
     lowerStatus.includes('nieaktywny') ||
     lowerStatus.includes('inactive') ||
     lowerStatus.includes('nie aktywny')
-  )
-    return 'error';
-  if (lowerStatus.includes('pending') || lowerStatus.includes('oczekuje')) return 'warning';
-  return 'default';
+  ) {
+    return {
+      bgcolor: '#FEF3F2',
+      color: '#B42318',
+      dotColor: '#F04438'
+    };
+  }
+  if (lowerStatus.includes('pending') || lowerStatus.includes('oczekuje')) {
+    return {
+      bgcolor: '#FFFAEB',
+      color: '#B54708',
+      dotColor: '#F79009'
+    };
+  }
+  return {
+    bgcolor: '#F2F4F7',
+    color: '#344054',
+    dotColor: '#667085'
+  };
 };
 
 export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>({
@@ -66,30 +86,44 @@ export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>(
   // Loading skeleton
   if (loading) {
     return (
-      <Stack spacing={2}>
+      <Box
+        sx={{
+          bgcolor: '#FFFFFF',
+          borderRadius: '12px',
+          overflow: 'hidden'
+        }}
+      >
         {[...Array(3)].map((_, index) => (
-          <Card key={index} sx={{ bgcolor: 'background.paper' }}>
-            <CardContent>
-              <Stack direction="row" spacing={2} alignItems="flex-start">
-                <Skeleton variant="circular" width={48} height={48} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton width="60%" height={24} />
-                  <Skeleton width="40%" height={20} />
-                  <Skeleton width="80%" height={16} sx={{ mt: 1 }} />
-                  <Skeleton width="50%" height={16} />
-                </Box>
+          <Box
+            key={index}
+            sx={{ p: 2, borderBottom: index < 2 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none' }}
+          >
+            <Stack spacing={1}>
+              <Skeleton width="60%" height={24} />
+              <Skeleton width="40%" height={20} />
+              <Stack direction="row" spacing={1}>
+                <Skeleton width={80} height={24} />
+                <Skeleton width={60} height={24} />
               </Stack>
-            </CardContent>
-          </Card>
+            </Stack>
+          </Box>
         ))}
-      </Stack>
+      </Box>
     );
   }
 
   // Empty state
   if (data.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
+      <Box
+        sx={{
+          bgcolor: '#FFFFFF',
+          borderRadius: '12px',
+          textAlign: 'center',
+          py: 8,
+          px: 3
+        }}
+      >
         <Typography variant="h6" color="text.secondary">
           Brak danych do wyświetlenia
         </Typography>
@@ -107,49 +141,58 @@ export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>(
   // Find subtitle column (company or second column)
   const subtitleColumn = columns.find((c) => c.property === 'company' || c.property === 'position');
 
-  // Other columns to display (excluding title, subtitle, and actions)
-  const detailColumns = columns.filter(
-    (c) =>
-      c.type !== 'actions' &&
-      c.property !== titleColumn?.property &&
-      c.property !== subtitleColumn?.property
-  );
+  // Find email column
+  const emailColumn = columns.find((c) => c.property === 'email');
+
+  // Find phone column
+  const phoneColumn = columns.find((c) => c.property === 'phone');
+
+  // Find status column
+  const statusColumn = columns.find((c) => c.type === 'status' || c.property === 'status');
+
+  // Find account_type column
+  const accountTypeColumn = columns.find((c) => c.property === 'account_type');
 
   return (
-    <Stack spacing={2}>
-      {data.map((row) => {
-        const rowId = getRowId(row);
-        const rowActions = (row.actions as ActionDef[]) || [];
+    <>
+      {/* White container for the list */}
+      <Box
+        sx={{
+          bgcolor: '#FFFFFF',
+          borderRadius: '12px',
+          overflow: 'hidden'
+        }}
+      >
+        {data.map((row, index) => {
+          const rowId = getRowId(row);
+          const rowActions = (row.actions as ActionDef[]) || [];
+          const isLast = index === data.length - 1;
 
-        // Get title value
-        const titleValue = titleColumn?.property ? String(row[titleColumn.property] || '') : '';
-        const subtitleValue = subtitleColumn?.property
-          ? String(row[subtitleColumn.property] || '')
-          : '';
+          // Get values
+          const titleValue = titleColumn?.property ? String(row[titleColumn.property] || '') : '';
+          const subtitleValue = subtitleColumn?.property
+            ? String(row[subtitleColumn.property] || '')
+            : '';
+          const emailValue = emailColumn?.property ? String(row[emailColumn.property] || '') : '';
+          const phoneValue = phoneColumn?.property ? String(row[phoneColumn.property] || '') : '';
+          const statusValue = statusColumn?.property
+            ? String(row[statusColumn.property] || '')
+            : '';
+          const accountTypeValue = accountTypeColumn?.property
+            ? String(row[accountTypeColumn.property] || '')
+            : '';
 
-        return (
-          <Card
-            key={rowId}
-            sx={{
-              bgcolor: 'background.paper',
-              borderRadius: '12px',
-              boxShadow: 'none',
-              border: '1px solid',
-              borderColor: '#E5E7EB',
-              '&:hover': {
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-              <Stack spacing={1.5}>
+          const statusStyles = getStatusChipStyles(statusValue);
+
+          return (
+            <Box key={rowId}>
+              <Box sx={{ p: 2 }}>
                 {/* Header row: Title + Menu */}
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                   <Typography
-                    variant="h6"
                     sx={{
                       fontWeight: 600,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       lineHeight: '24px',
                       color: '#1E1F21',
                       flex: 1,
@@ -163,103 +206,130 @@ export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>(
                     <IconButton
                       size="small"
                       onClick={(e) => handleMenuOpen(e, row)}
-                      sx={{ color: '#74767F', mt: -0.5 }}
+                      sx={{ color: '#8E9098', mt: -0.5, mr: -1 }}
                     >
                       <MoreVertIcon fontSize="small" />
                     </IconButton>
                   )}
                 </Stack>
 
-                {/* Metadata row */}
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                  {subtitleValue && (
-                    <Typography
-                      variant="body2"
+                {/* Subtitle - Company/Location */}
+                {subtitleValue && (
+                  <Typography
+                    sx={{
+                      color: '#74767F',
+                      fontSize: '14px',
+                      lineHeight: '20px',
+                      fontWeight: 400,
+                      mt: 0.5
+                    }}
+                  >
+                    {subtitleColumn?.label}: {subtitleValue}
+                  </Typography>
+                )}
+
+                {/* Email */}
+                {emailValue && (
+                  <Typography
+                    sx={{
+                      color: '#74767F',
+                      fontSize: '14px',
+                      lineHeight: '20px',
+                      fontWeight: 400,
+                      mt: 0.5
+                    }}
+                  >
+                    {emailColumn?.label || 'Email'}: {emailValue}
+                  </Typography>
+                )}
+
+                {/* Phone */}
+                {phoneValue && (
+                  <Typography
+                    sx={{
+                      color: '#74767F',
+                      fontSize: '14px',
+                      lineHeight: '20px',
+                      fontWeight: 400,
+                      mt: 0.5
+                    }}
+                  >
+                    {phoneColumn?.label || 'Telefon'}: {phoneValue}
+                  </Typography>
+                )}
+
+                {/* Status and Account Type chips */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                  sx={{ mt: 1.5 }}
+                >
+                  {/* Status chip with dot */}
+                  {statusValue && (
+                    <Chip
+                      size="small"
+                      label={statusValue}
+                      icon={
+                        <Box
+                          sx={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            bgcolor: statusStyles.dotColor,
+                            ml: 1
+                          }}
+                        />
+                      }
                       sx={{
-                        color: '#74767F',
-                        fontSize: '14px',
-                        lineHeight: '20px'
+                        bgcolor: statusStyles.bgcolor,
+                        color: statusStyles.color,
+                        fontWeight: 500,
+                        fontSize: '12px',
+                        height: '24px',
+                        borderRadius: '16px',
+                        '& .MuiChip-icon': {
+                          mr: '4px',
+                          ml: 0
+                        },
+                        '& .MuiChip-label': {
+                          px: 1,
+                          pr: 1.5
+                        }
                       }}
-                    >
-                      {subtitleColumn?.label}: {subtitleValue}
-                    </Typography>
+                    />
+                  )}
+
+                  {/* Account type chip */}
+                  {accountTypeValue && (
+                    <Chip
+                      size="small"
+                      label={accountTypeValue}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: '16px',
+                        borderColor: '#D0D5DD',
+                        color: '#344054',
+                        fontWeight: 500,
+                        fontSize: '12px',
+                        height: '24px',
+                        bgcolor: 'transparent',
+                        '& .MuiChip-label': {
+                          px: 1.5
+                        }
+                      }}
+                    />
                   )}
                 </Stack>
+              </Box>
 
-                {/* Status badges and chips */}
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                  {detailColumns.map((column) => {
-                    if (!column.property) return null;
-                    const value = row[column.property];
-                    if (value === null || value === undefined || value === '') return null;
-
-                    // Show status as dot + text, other fields as outlined chips
-                    if (column.type === 'status' || column.property === 'status') {
-                      const statusColor = getStatusColor(String(value));
-                      const dotColor =
-                        statusColor === 'success'
-                          ? '#10B981'
-                          : statusColor === 'error'
-                            ? '#EF4444'
-                            : statusColor === 'warning'
-                              ? '#F59E0B'
-                              : '#6B7280';
-
-                      return (
-                        <Stack
-                          key={column.property}
-                          direction="row"
-                          spacing={0.75}
-                          alignItems="center"
-                        >
-                          <Box
-                            sx={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: '50%',
-                              bgcolor: dotColor
-                            }}
-                          />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#32343A',
-                              fontSize: '14px',
-                              lineHeight: '20px'
-                            }}
-                          >
-                            {String(value)}
-                          </Typography>
-                        </Stack>
-                      );
-                    }
-
-                    // Other fields as chips
-                    return (
-                      <Chip
-                        key={column.property}
-                        label={String(value)}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderRadius: '6px',
-                          borderColor: '#E5E7EB',
-                          color: '#74767F',
-                          fontSize: '12px',
-                          height: '24px',
-                          '& .MuiChip-label': {
-                            px: 1
-                          }
-                        }}
-                      />
-                    );
-                  })}
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
-        );
-      })}
+              {/* Divider between items */}
+              {!isLast && <Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.12)' }} />}
+            </Box>
+          );
+        })}
+      </Box>
 
       {/* Actions Menu */}
       <Menu
@@ -270,8 +340,9 @@ export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>(
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
           sx: {
+            bgcolor: '#FFFFFF',
             borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             minWidth: 160
           }
         }}
@@ -283,14 +354,17 @@ export const MobileCardListRenderer = <T extends GenericRecord = GenericRecord>(
             sx={{
               color: action.type === 'button_delete' ? '#EF4444' : '#32343A',
               fontSize: '14px',
-              py: 1.5
+              py: 1.5,
+              '&:hover': {
+                bgcolor: '#F9FAFB'
+              }
             }}
           >
             {action.label}
           </MenuItem>
         ))}
       </Menu>
-    </Stack>
+    </>
   );
 };
 

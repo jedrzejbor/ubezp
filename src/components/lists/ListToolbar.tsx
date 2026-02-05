@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -87,11 +87,7 @@ export const ListToolbar = ({
   // Filter drawer state
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
-  // Current sort label
-  const currentSortLabel = useMemo(() => {
-    const currentSort = sortable.find((s) => s.property === sortProperty && s.order === sortOrder);
-    return currentSort?.label || 'Sortowanie';
-  }, [sortable, sortProperty, sortOrder]);
+  // Note: removed unused dynamic sort label — using fixed "Sortuj" on mobile
 
   const handleSortClick = (event: React.MouseEvent<HTMLElement>) => {
     setSortAnchorEl(event.currentTarget);
@@ -218,44 +214,49 @@ export const ListToolbar = ({
             variant="outlined"
             startIcon={<SortIcon sx={{ fontSize: 18 }} />}
             onClick={handleSortClick}
-            fullWidth
             sx={{
               color: '#32343A',
               textTransform: 'none',
               borderColor: '#E5E7EB',
               borderRadius: '8px',
-              fontWeight: 400,
+              fontWeight: 500,
               fontSize: '14px',
               justifyContent: 'flex-start',
-              px: 2,
-              py: 1.25,
+              px: '16px',
+              py: '12px',
               bgcolor: 'white',
+              width: 'auto',
+              minWidth: 0,
               '&:hover': {
                 borderColor: '#D0D5DD',
                 bgcolor: '#FAFAFA'
               }
             }}
           >
-            {currentSortLabel === 'Sortowanie' ? 'Alfabetycznie' : currentSortLabel}
+            Sortuj
           </Button>
+
+          {/* spacer to push Filter button to the right */}
+          <Box sx={{ flex: 1 }} />
 
           {/* Filter button */}
           <Button
             variant="outlined"
             startIcon={<FilterListIcon sx={{ fontSize: 18 }} />}
             onClick={handleFilterDrawerToggle}
-            fullWidth
             sx={{
               color: '#32343A',
               textTransform: 'none',
               borderColor: '#E5E7EB',
               borderRadius: '8px',
-              fontWeight: 400,
+              fontWeight: 500,
               fontSize: '14px',
               justifyContent: 'flex-start',
-              px: 2,
-              py: 1.25,
+              px: '16px',
+              py: '12px',
               bgcolor: 'white',
+              width: 'auto',
+              minWidth: 0,
               '&:hover': {
                 borderColor: '#D0D5DD',
                 bgcolor: '#FAFAFA'
@@ -272,8 +273,7 @@ export const ListToolbar = ({
                     height: '20px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    ml: 'auto'
+                    justifyContent: 'center'
                   }}
                 >
                   <Typography
@@ -320,6 +320,14 @@ export const ListToolbar = ({
           open={sortMenuOpen}
           onClose={handleSortClose}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          PaperProps={{
+            sx: {
+              bgcolor: '#FFFFFF',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              minWidth: 180
+            }
+          }}
         >
           {sortable.map((sort, index) => (
             <MenuItem
@@ -339,6 +347,7 @@ export const ListToolbar = ({
           onClose={handleFilterDrawerToggle}
           sx={{
             '& .MuiDrawer-paper': {
+              bgcolor: '#FFFFFF',
               borderRadius: '20px 20px 0 0',
               p: 3,
               maxHeight: '80vh'
@@ -414,7 +423,7 @@ export const ListToolbar = ({
             textTransform: 'none',
             borderColor: '#E5E7EB',
             borderRadius: '8px',
-            fontWeight: 400,
+            fontWeight: 500,
             fontSize: '14px',
             px: 2,
             bgcolor: 'white',
@@ -464,7 +473,7 @@ export const ListToolbar = ({
             textTransform: 'none',
             borderColor: '#E5E7EB',
             borderRadius: '8px',
-            fontWeight: 400,
+            fontWeight: 500,
             fontSize: '14px',
             px: 2,
             bgcolor: 'white',
@@ -584,6 +593,14 @@ export const ListToolbar = ({
         onClose={handleSortClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{
+          sx: {
+            bgcolor: '#FFFFFF',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            minWidth: 180
+          }
+        }}
       >
         {sortable.map((sort, index) => (
           <MenuItem
@@ -603,6 +620,7 @@ export const ListToolbar = ({
         onClose={handleFilterDrawerToggle}
         sx={{
           '& .MuiDrawer-paper': {
+            bgcolor: '#FFFFFF',
             width: 320,
             p: 3
           }
