@@ -204,7 +204,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
         '& .MuiAutocomplete-root .MuiOutlinedInput-root': { borderRadius: '4px' }
       }}
     >
-      {/* Dane ubezpieczyciela */}
       <Typography
         sx={{
           fontSize: '14px',
@@ -213,7 +212,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
           mb: 2.5
         }}
       >
-        Dane ubezpieczyciela
+        Dane użytkownika
       </Typography>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
