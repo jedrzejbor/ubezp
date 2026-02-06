@@ -1,14 +1,20 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { GenericListView } from '@/components/lists';
 import { fetchUsersTable, deleteUser, UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
+import AddUserDialog from '@/components/dialogs/AddUserDialog';
+import EditUserDialog from '@/components/dialogs/EditUserDialog';
+import type { AddUserFormValues, EditUserFormValues } from '@/utils/formSchemas';
 
 const UsersPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useUiStore();
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
 
   // Row handlers - actions for each row
   const handleViewUser = useCallback(
@@ -20,14 +26,11 @@ const UsersPage: React.FC = () => {
     [navigate]
   );
 
-  const handleEditUser = useCallback(
-    (row: UserRecord) => {
-      // Navigate to edit user page
-      const userId = row.id || row.email;
-      navigate(`/app/users/${userId}/edit`);
-    },
-    [navigate]
-  );
+  const handleEditUser = useCallback((row: UserRecord) => {
+    // Open edit dialog with user data
+    setSelectedUser(row);
+    setEditUserDialogOpen(true);
+  }, []);
 
   const handleDeleteUser = useCallback(
     async (row: UserRecord) => {
@@ -58,8 +61,37 @@ const UsersPage: React.FC = () => {
 
   // General handlers - actions in toolbar
   const handleCreateUser = useCallback(() => {
-    navigate('/app/users/create');
-  }, [navigate]);
+    setAddUserDialogOpen(true);
+  }, []);
+
+  // Handle dialog close
+  const handleAddUserDialogClose = useCallback(() => {
+    setAddUserDialogOpen(false);
+  }, []);
+
+  // Handle user created successfully
+  const handleUserCreated = useCallback((data: AddUserFormValues, generatedPassword: string) => {
+    // Optionally refresh the list or show additional feedback
+    console.log('User created:', data.email, 'Password:', generatedPassword);
+  }, []);
+
+  // Handle dialog close
+  const handleEditUserDialogClose = useCallback(() => {
+    setEditUserDialogOpen(false);
+    setSelectedUser(null);
+  }, []);
+
+  // Handle user updated successfully
+  const handleUserUpdated = useCallback(
+    (data: EditUserFormValues) => {
+      addToast({
+        id: crypto.randomUUID(),
+        message: `Użytkownik ${data.email} został zaktualizowany`,
+        severity: 'success'
+      });
+    },
+    [addToast]
+  );
 
   // Bulk handlers - actions for selected rows
   const handleBulkNotify = useCallback(
@@ -79,9 +111,10 @@ const UsersPage: React.FC = () => {
     // Row actions (from backend actions[])
     view: handleViewUser,
     edit: handleEditUser,
+    'edit-user': handleEditUser,
     delete: handleDeleteUser,
     // General actions (from backend generalActions[])
-    create: handleCreateUser
+    'create-user': handleCreateUser
   };
 
   // Bulk handlers map
@@ -109,6 +142,19 @@ const UsersPage: React.FC = () => {
         bulkHandlers={bulkHandlers}
         rowKey={(row) => String(row.id || row.email)}
         initialPerPage={10}
+      />
+
+      <AddUserDialog
+        open={addUserDialogOpen}
+        onClose={handleAddUserDialogClose}
+        onSuccess={handleUserCreated}
+      />
+
+      <EditUserDialog
+        open={editUserDialogOpen}
+        onClose={handleEditUserDialogClose}
+        user={selectedUser}
+        onSuccess={handleUserUpdated}
       />
     </Box>
   );
