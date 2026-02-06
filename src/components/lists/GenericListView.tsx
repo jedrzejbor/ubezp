@@ -206,31 +206,47 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
                 {title}
               </Typography>
 
-              {/* Add button from general actions */}
-              {meta.generalActions
-                .filter((action) => action.type === 'button_primary')
-                .map((action) => (
-                  <Button
-                    key={action.handler}
-                    variant="contained"
-                    startIcon={<AddIcon sx={{ fontSize: 18 }} />}
-                    onClick={() => handleGeneralAction(action.handler)}
-                    sx={{
-                      textTransform: 'none',
-                      borderRadius: '8px',
-                      fontWeight: 500,
-                      fontSize: '14px',
-                      px: 2.5,
-                      bgcolor: '#1E1F21',
-                      color: 'white',
-                      '&:hover': {
-                        bgcolor: '#32343A'
+              {/* Add button from general actions or default "create-user" handler */}
+              {(() => {
+                const generalActions = meta?.generalActions || [];
+                // Add default "Dodaj" action if create-user handler exists and not in generalActions
+                const hasCreateAction = generalActions.some((a) => a.handler === 'create-user');
+                const actionsToShow = hasCreateAction
+                  ? generalActions
+                  : [
+                      ...generalActions,
+                      {
+                        type: 'button_primary' as const,
+                        label: 'Dodaj',
+                        handler: 'create-user'
                       }
-                    }}
-                  >
-                    {action.label}
-                  </Button>
-                ))}
+                    ];
+
+                return actionsToShow
+                  .filter((action) => action.type === 'button_primary')
+                  .map((action) => (
+                    <Button
+                      key={action.handler}
+                      variant="contained"
+                      startIcon={<AddIcon sx={{ fontSize: 18 }} />}
+                      onClick={() => handleGeneralAction(action.handler)}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        px: 2.5,
+                        bgcolor: '#1E1F21',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: '#32343A'
+                        }
+                      }}
+                    >
+                      {action.label}
+                    </Button>
+                  ));
+              })()}
             </Stack>
 
             {/* Search and Filter/Sort buttons */}
