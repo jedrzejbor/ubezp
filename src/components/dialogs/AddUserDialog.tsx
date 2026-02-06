@@ -213,7 +213,6 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
         '& .MuiAutocomplete-root .MuiOutlinedInput-root': { borderRadius: '4px' }
       }}
     >
-      {/* Dane ubezpieczyciela */}
       <Typography
         sx={{
           fontSize: '14px',
@@ -222,7 +221,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
           mb: 2.5
         }}
       >
-        Dane ubezpieczyciela
+        Dane użytkownika
       </Typography>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
