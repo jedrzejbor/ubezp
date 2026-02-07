@@ -21,9 +21,9 @@ const UsersPage: React.FC = () => {
   // Row handlers - actions for each row
   const handleViewUser = useCallback(
     (row: UserRecord) => {
-      // Navigate to user details page
+      // Navigate to user details page, pass row data via state
       const userId = row.id || row.email; // Use ID if available, otherwise email as fallback
-      navigate(`/app/users/${userId}`);
+      navigate(`/app/users/${userId}`, { state: { user: row } });
     },
     [navigate]
   );
@@ -120,6 +120,7 @@ const UsersPage: React.FC = () => {
   const handlers = {
     // Row actions (from backend actions[])
     view: handleViewUser,
+    'view-user': handleViewUser,
     edit: handleEditUser,
     'edit-user': handleEditUser,
     delete: handleDeleteUser,
