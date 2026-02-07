@@ -1,0 +1,792 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Box,
+  Button,
+  Stack,
+  Typography,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  Chip,
+  Divider,
+  Autocomplete,
+  useMediaQuery,
+  useTheme,
+  IconButton,
+  Dialog,
+  DialogContent,
+  Drawer
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { addUserSchema, type AddUserFormValues } from '@/utils/formSchemas';
+import { generateSecurePassword } from '@/utils/passwordGenerator';
+
+export interface AddUserDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: (data: AddUserFormValues, password: string) => void;
+}
+
+// Mock data - replace with API calls
+const ROLES = [
+  { value: 'super_admin_csb', label: 'Super admin CSB' },
+  { value: 'admin_klient', label: 'Admin Klient' },
+  { value: 'klient_user', label: 'Klient User' }
+];
+
+const COMPANIES = [
+  { value: 'cliffside_brokers', label: 'Cliffside Brokers' },
+  { value: 'maspex', label: 'Maspex' },
+  { value: 'kubus', label: 'Kubuś' },
+  { value: 'lubella', label: 'Lubella' }
+];
+
+const POSITIONS = [
+  { value: 'dyrektor', label: 'Dyrektor' },
+  { value: 'kierownik', label: 'Kierownik' },
+  { value: 'specjalista', label: 'Specjalista' },
+  { value: 'asystent', label: 'Asystent' }
+];
+
+const COMPETENCIES = [
+  { value: 'pojazdy', label: 'pojazdy' },
+  { value: 'mienie', label: 'mienie' },
+  { value: 'oc', label: 'OC' },
+  { value: 'nnw', label: 'NNW' }
+];
+
+const ACCOUNT_TYPES = [
+  { value: 'firma', label: 'Firma' },
+  { value: 'osoba_fizyczna', label: 'Osoba fizyczna' }
+];
+
+const STATUSES = [
+  { value: 'aktywny', label: 'Aktywny' },
+  { value: 'nieaktywny', label: 'Nieaktywny' }
+];
+
+const ENTITIES = [
+  { value: 'maspex', label: 'Maspex' },
+  { value: 'kubus', label: 'Kubuś' },
+  { value: 'twix', label: 'Twix' },
+  { value: 'lubella', label: 'Lubella' }
+];
+
+const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const [loading, setLoading] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [createdEmail, setCreatedEmail] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm<AddUserFormValues>({
+    resolver: zodResolver(addUserSchema),
+    defaultValues: {
+      role: '',
+      company: '',
+      firstName: '',
+      lastName: '',
+      position: '',
+      competencies: [],
+      phone: '',
+      email: '',
+      accountType: '',
+      status: 'aktywny',
+      hasRelations: false,
+      managingEntities: [],
+      dependentEntities: []
+    }
+  });
+
+  const hasRelations = watch('hasRelations');
+
+  // Generate password on component mount
+  const password = useMemo(() => generateSecurePassword(10), []);
+
+  const handleFormSubmit = async (data: AddUserFormValues) => {
+    setLoading(true);
+    try {
+      // TODO: Call API to create user
+      // await createUser({ ...data, password });
+
+      setGeneratedPassword(password);
+      setCreatedEmail(data.email);
+      setStep(2);
+
+      // Callback for parent component
+      onSuccess?.(data, password);
+    } catch (error) {
+      console.error('Error creating user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyCredentials = async () => {
+    const credentials = `Login: ${createdEmail}\nHasło: ${generatedPassword}`;
+    await navigator.clipboard.writeText(credentials);
+  };
+
+  const handleAddAnother = () => {
+    reset();
+    setStep(1);
+    setGeneratedPassword('');
+    setCreatedEmail('');
+  };
+
+  const handleClose = () => {
+    reset();
+    setStep(1);
+    setGeneratedPassword('');
+    setCreatedEmail('');
+    onClose();
+  };
+
+  // Progress bar component
+  const ProgressBar = () => (
+    <Box sx={{ px: 1, mb: 2 }}>
+      <Stack direction="row" gap={0.5} sx={{ py: 1 }}>
+        <Box
+          sx={{
+            flex: 1,
+            height: 8,
+            borderRadius: '100px',
+            bgcolor: '#8F6D5F'
+          }}
+        />
+        <Box
+          sx={{
+            flex: 1,
+            height: 8,
+            borderRadius: '100px',
+            bgcolor: step === 2 ? '#8F6D5F' : '#9E9E9E'
+          }}
+        />
+      </Stack>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography
+          sx={{
+            fontSize: '12px',
+            color: '#74767F',
+            letterSpacing: '0.4px'
+          }}
+        >
+          Krok
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: '12px',
+            color: '#74767F',
+            letterSpacing: '0.4px'
+          }}
+        >
+          {step} z 2
+        </Typography>
+      </Stack>
+    </Box>
+  );
+
+  // Step 1: Form fields
+  const Step1Content = () => (
+    <Box
+      component="form"
+      onSubmit={handleSubmit(handleFormSubmit)}
+      sx={{
+        '& .MuiOutlinedInput-root': { borderRadius: '4px' },
+        '& .MuiOutlinedInput-notchedOutline': { borderRadius: '4px' },
+        '& .MuiAutocomplete-root .MuiOutlinedInput-root': { borderRadius: '4px' }
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: '14px',
+          color: 'rgba(0, 0, 0, 0.6)',
+          letterSpacing: '0.17px',
+          mb: 2.5
+        }}
+      >
+        Dane użytkownika
+      </Typography>
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
+        <Controller
+          name="role"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth size="medium" error={Boolean(errors.role)}>
+              <InputLabel>Rola w systemie</InputLabel>
+              <Select
+                {...field}
+                label="Rola w systemie"
+                MenuProps={{
+                  PaperProps: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
+              >
+                {ROLES.map((role) => (
+                  <MenuItem key={role.value} value={role.value}>
+                    {role.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          name="company"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth size="medium" error={Boolean(errors.company)}>
+              <InputLabel>Firma</InputLabel>
+              <Select
+                {...field}
+                label="Firma"
+                MenuProps={{
+                  PaperProps: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
+              >
+                {COMPANIES.map((company) => (
+                  <MenuItem key={company.value} value={company.value}>
+                    {company.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
+      </Stack>
+
+      {/* Dane użytkownika */}
+      <Typography
+        sx={{
+          fontSize: '14px',
+          color: 'rgba(0, 0, 0, 0.6)',
+          letterSpacing: '0.17px',
+          mb: 2.5
+        }}
+      >
+        Dane użytkownika
+      </Typography>
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
+        <TextField
+          label="Imię"
+          {...register('firstName')}
+          error={Boolean(errors.firstName)}
+          helperText={errors.firstName?.message}
+          fullWidth
+          size="medium"
+        />
+        <TextField
+          label="Nazwisko"
+          {...register('lastName')}
+          error={Boolean(errors.lastName)}
+          helperText={errors.lastName?.message}
+          fullWidth
+          size="medium"
+        />
+      </Stack>
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
+        <Controller
+          name="position"
+          control={control}
+          render={({ field }) => (
+            <FormControl size="medium" sx={{ flex: 1 }}>
+              <InputLabel>Stanowisko</InputLabel>
+              <Select
+                {...field}
+                label="Stanowisko"
+                MenuProps={{
+                  PaperProps: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
+              >
+                {POSITIONS.map((pos) => (
+                  <MenuItem key={pos.value} value={pos.value}>
+                    {pos.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          name="competencies"
+          control={control}
+          render={({ field }) => (
+            <Autocomplete
+              multiple
+              options={COMPETENCIES}
+              getOptionLabel={(option) => option.label}
+              value={COMPETENCIES.filter((c) => field.value?.includes(c.value))}
+              onChange={(_, newValue) => {
+                field.onChange(newValue.map((v) => v.value));
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Zakres kompetencji" size="medium" />
+              )}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    label={option.label}
+                    size="small"
+                    {...getTagProps({ index })}
+                    key={option.value}
+                    sx={{
+                      borderRadius: '16px',
+                      border: '1px solid rgba(0, 0, 0, 0.5)',
+                      bgcolor: 'transparent'
+                    }}
+                  />
+                ))
+              }
+              sx={{ flex: 1 }}
+            />
+          )}
+        />
+      </Stack>
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2.5 }}>
+        <TextField
+          label="Telefon"
+          {...register('phone')}
+          error={Boolean(errors.phone)}
+          helperText={errors.phone?.message}
+          fullWidth
+          size="medium"
+        />
+        <TextField
+          label="Email"
+          type="email"
+          {...register('email')}
+          error={Boolean(errors.email)}
+          helperText={errors.email?.message}
+          fullWidth
+          size="medium"
+        />
+      </Stack>
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
+        <Controller
+          name="accountType"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth size="medium" error={Boolean(errors.accountType)}>
+              <InputLabel>Rodzaj konta</InputLabel>
+              <Select
+                {...field}
+                label="Rodzaj konta"
+                MenuProps={{
+                  PaperProps: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
+              >
+                {ACCOUNT_TYPES.map((type) => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth size="medium" error={Boolean(errors.status)}>
+              <InputLabel>Status użytkownika</InputLabel>
+              <Select
+                {...field}
+                label="Status użytkownika"
+                MenuProps={{
+                  PaperProps: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
+              >
+                {STATUSES.map((status) => (
+                  <MenuItem key={status.value} value={status.value}>
+                    {status.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
+      </Stack>
+
+      {/* Podmiot ma powiązania */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Typography sx={{ fontSize: '16px', color: '#000', letterSpacing: '0.15px' }}>
+          Podmiot ma powiązania
+        </Typography>
+        <Controller
+          name="hasRelations"
+          control={control}
+          render={({ field }) => (
+            <Switch
+              checked={field.value}
+              onChange={(e) => field.onChange(e.target.checked)}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: '#1E1F21'
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: '#1E1F21'
+                }
+              }}
+            />
+          )}
+        />
+      </Stack>
+
+      {hasRelations && (
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
+          <Controller
+            name="managingEntities"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                multiple
+                options={ENTITIES}
+                getOptionLabel={(option) => option.label}
+                value={ENTITIES.filter((e) => field.value?.includes(e.value))}
+                onChange={(_, newValue) => {
+                  field.onChange(newValue.map((v) => v.value));
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Wybierz podmioty zarządzające" size="medium" />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      label={option.label}
+                      size="small"
+                      {...getTagProps({ index })}
+                      key={option.value}
+                      sx={{
+                        borderRadius: '16px',
+                        border: '1px solid rgba(0, 0, 0, 0.5)',
+                        bgcolor: 'transparent'
+                      }}
+                    />
+                  ))
+                }
+                sx={{ flex: 1 }}
+              />
+            )}
+          />
+
+          <Controller
+            name="dependentEntities"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                multiple
+                options={ENTITIES}
+                getOptionLabel={(option) => option.label}
+                value={ENTITIES.filter((e) => field.value?.includes(e.value))}
+                onChange={(_, newValue) => {
+                  field.onChange(newValue.map((v) => v.value));
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Wybierz podmioty zależne" size="medium" />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      label={option.label}
+                      size="small"
+                      {...getTagProps({ index })}
+                      key={option.value}
+                      sx={{
+                        borderRadius: '16px',
+                        border: '1px solid rgba(0, 0, 0, 0.5)',
+                        bgcolor: 'transparent'
+                      }}
+                    />
+                  ))
+                }
+                sx={{ flex: 1 }}
+              />
+            )}
+          />
+        </Stack>
+      )}
+
+      {/* Action buttons */}
+      <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}>
+        <Button
+          variant="outlined"
+          onClick={handleClose}
+          sx={{
+            borderColor: '#D0D5DD',
+            color: '#1E1F21',
+            borderRadius: '8px',
+            px: 3,
+            py: 1,
+            fontSize: '14px',
+            fontWeight: 500,
+            textTransform: 'none',
+            boxShadow: '0px 1px 2px rgba(16, 24, 40, 0.05)',
+            '&:hover': {
+              borderColor: '#D0D5DD',
+              bgcolor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          Anuluj
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={loading}
+          sx={{
+            bgcolor: '#1E1F21',
+            color: '#FFFFFF',
+            borderRadius: '8px',
+            px: 4,
+            py: 1,
+            minWidth: 140,
+            fontSize: '14px',
+            fontWeight: 500,
+            textTransform: 'none',
+            '&:hover': {
+              bgcolor: '#32343A'
+            }
+          }}
+        >
+          Dalej
+        </Button>
+      </Stack>
+    </Box>
+  );
+
+  // Step 2: Success / Credentials display
+  const Step2Content = () => (
+    <Box>
+      <Typography
+        sx={{
+          fontSize: '14px',
+          color: 'rgba(0, 0, 0, 0.6)',
+          letterSpacing: '0.17px',
+          mb: 3
+        }}
+      >
+        Utworzono nowe konto użytkownika
+      </Typography>
+
+      {/* Credentials card */}
+      <Box
+        sx={{
+          border: '1px solid rgba(143, 109, 95, 0.12)',
+          borderRadius: '8px',
+          px: 2,
+          py: 1
+        }}
+      >
+        <Stack spacing={1}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ py: 1.5, px: 1.5 }}
+          >
+            <Typography sx={{ fontSize: '14px', color: '#74767F' }}>Login</Typography>
+            <Typography sx={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.87)' }}>
+              {createdEmail}
+            </Typography>
+          </Stack>
+
+          <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ py: 1.5, px: 1.5 }}
+          >
+            <Typography sx={{ fontSize: '14px', color: '#74767F' }}>Hasło</Typography>
+            <Typography sx={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.87)' }}>
+              {generatedPassword}
+            </Typography>
+          </Stack>
+        </Stack>
+      </Box>
+
+      {/* Action buttons */}
+      <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}>
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleAddAnother}
+          sx={{
+            borderColor: '#D0D5DD',
+            color: '#1E1F21',
+            borderRadius: '8px',
+            px: 3,
+            py: 1,
+            fontSize: '14px',
+            fontWeight: 500,
+            textTransform: 'none',
+            boxShadow: '0px 1px 2px rgba(16, 24, 40, 0.05)',
+            '&:hover': {
+              borderColor: '#D0D5DD',
+              bgcolor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          Dodaj następnego użytkownika
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<ContentCopyIcon />}
+          onClick={handleCopyCredentials}
+          sx={{
+            bgcolor: '#1E1F21',
+            color: '#FFFFFF',
+            borderRadius: '8px',
+            px: 3,
+            py: 1,
+            fontSize: '14px',
+            fontWeight: 500,
+            textTransform: 'none',
+            '&:hover': {
+              bgcolor: '#32343A'
+            }
+          }}
+        >
+          Skopiuj logowanie i hasło
+        </Button>
+      </Stack>
+    </Box>
+  );
+
+  // Dialog content
+  const content = (
+    <Box sx={{ pb: 3 }}>
+      <ProgressBar />
+      {step === 1 ? <Step1Content /> : <Step2Content />}
+    </Box>
+  );
+
+  // Mobile: Drawer from bottom
+  if (isMobile) {
+    return (
+      <Drawer
+        anchor="bottom"
+        open={open}
+        onClose={handleClose}
+        sx={{
+          zIndex: (theme) => theme.zIndex.modal + 100,
+          '& .MuiDrawer-paper': {
+            backgroundColor: theme.palette.background.paper,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }
+        }}
+      >
+        <Box sx={{ pb: 3, pt: 1 }}>
+          {/* Header with close button */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ px: 2, pt: 1 }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 300,
+                fontSize: '20px',
+                lineHeight: 1.6,
+                letterSpacing: '0.15px',
+                color: 'rgba(0, 0, 0, 0.87)'
+              }}
+            >
+              Dodaj nowego użytkownika
+            </Typography>
+            <IconButton onClick={handleClose} size="small" aria-label="Zamknij">
+              <CloseIcon sx={{ color: '#8E9098' }} />
+            </IconButton>
+          </Stack>
+
+          {/* Content */}
+          <Box sx={{ px: 2, pt: 2 }}>{content}</Box>
+        </Box>
+      </Drawer>
+    );
+  }
+
+  // Desktop: centered Dialog
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          maxWidth: 672
+        }
+      }}
+    >
+      <DialogContent sx={{ p: 2, pt: 2, backgroundColor: theme.palette.background.paper }}>
+        {/* Header with title and close button */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 300,
+              fontSize: '20px',
+              lineHeight: 1.6,
+              letterSpacing: '0.15px',
+              color: 'rgba(0, 0, 0, 0.87)'
+            }}
+          >
+            Dodaj nowego użytkownika
+          </Typography>
+          <IconButton onClick={handleClose} size="medium" aria-label="Zamknij">
+            <CloseIcon sx={{ color: '#8E9098' }} />
+          </IconButton>
+        </Stack>
+
+        {/* Content */}
+        {content}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddUserDialog;
