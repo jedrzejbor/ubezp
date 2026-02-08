@@ -154,6 +154,12 @@ const AppLayout = () => {
       breadcrumbs.push({ label: routeMap[path] });
     }
 
+    // Handle dynamic routes like /app/users/:userId
+    if (path.startsWith('/app/users/') && path !== '/app/users') {
+      breadcrumbs.push({ label: 'Lista użytkowników', href: '/app/users' });
+      breadcrumbs.push({ label: 'Szczegóły użytkownika' });
+    }
+
     return breadcrumbs;
   };
 
