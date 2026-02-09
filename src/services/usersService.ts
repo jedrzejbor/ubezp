@@ -15,6 +15,22 @@ export interface UserRecord extends GenericRecord {
   status: string;
 }
 
+export interface UserDetailsApiUser {
+  id: string | number;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  created_at?: string;
+  password_last_change_at?: string;
+}
+
+export interface UserDetailsResponse {
+  user: UserDetailsApiUser;
+  actions?: { type: string; label: string; handler: string }[];
+}
+
 /**
  * Build query string from FetcherParams
  */
@@ -77,6 +93,13 @@ export const deleteUser = async (userId: string | number, password: string): Pro
   await apiClient.delete(`/api/user/${userId}`, {
     body: JSON.stringify({ password })
   });
+};
+
+/**
+ * Fetch single user details
+ */
+export const getUserDetails = async (userId: string | number): Promise<UserDetailsResponse> => {
+  return apiClient.get<UserDetailsResponse>(`/api/user/${userId}`);
 };
 
 /**
