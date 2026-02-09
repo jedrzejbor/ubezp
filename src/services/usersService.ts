@@ -96,6 +96,13 @@ export const deleteUser = async (userId: string | number, password: string): Pro
 };
 
 /**
+ * Restore soft-deleted user by ID
+ */
+export const restoreUser = async (userId: string | number): Promise<void> => {
+  await apiClient.post(`/api/user/${userId}/restore`);
+};
+
+/**
  * Fetch single user details
  */
 export const getUserDetails = async (userId: string | number): Promise<UserDetailsResponse> => {

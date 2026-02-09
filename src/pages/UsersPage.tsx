@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { GenericListView } from '@/components/lists';
-import { fetchUsersTable, UserRecord } from '@/services/usersService';
+import { fetchUsersTable, restoreUser, UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
 import AddUserDialog from '@/components/dialogs/AddUserDialog';
 import EditUserDialog from '@/components/dialogs/EditUserDialog';
@@ -40,6 +40,38 @@ const UsersPage: React.FC = () => {
     setSelectedUser(row);
     setDeleteUserDialogOpen(true);
   }, []);
+
+  const handleRestoreUser = useCallback(
+    async (row: UserRecord) => {
+      if (!row.id) {
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Brak identyfikatora użytkownika',
+          severity: 'error'
+        });
+        return;
+      }
+
+      try {
+        await restoreUser(row.id);
+        addToast({
+          id: crypto.randomUUID(),
+          message: `Użytkownik ${row.full_name} został przywrócony`,
+          severity: 'success'
+        });
+        setRefreshKey(Date.now());
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Wystąpił błąd podczas przywracania';
+        addToast({
+          id: crypto.randomUUID(),
+          message,
+          severity: 'error'
+        });
+      }
+    },
+    [addToast]
+  );
 
   // General handlers - actions in toolbar
   const handleCreateUser = useCallback(() => {
@@ -124,6 +156,7 @@ const UsersPage: React.FC = () => {
     'edit-user': handleEditUser,
     delete: handleDeleteUser,
     'delete-user': handleDeleteUser,
+    'restore-user': handleRestoreUser,
     // General actions (from backend generalActions[])
     'create-user': handleCreateUser
   };
