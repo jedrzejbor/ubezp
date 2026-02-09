@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { GenericListView } from '@/components/lists';
-import { fetchUsersTable, deleteUser, UserRecord } from '@/services/usersService';
+import { fetchUsersTable, UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
 import AddUserDialog from '@/components/dialogs/AddUserDialog';
 import EditUserDialog from '@/components/dialogs/EditUserDialog';
@@ -17,6 +17,7 @@ const UsersPage: React.FC = () => {
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
+  const [refreshKey, setRefreshKey] = useState<number | undefined>(undefined);
 
   // Row handlers - actions for each row
   const handleViewUser = useCallback(
@@ -85,14 +86,12 @@ const UsersPage: React.FC = () => {
     if (!selectedUser) return;
 
     try {
-      const userId = selectedUser.id || selectedUser.email;
-      await deleteUser(userId as string);
-
       addToast({
         id: crypto.randomUUID(),
         message: `Użytkownik ${selectedUser.full_name} został usunięty`,
         severity: 'success'
       });
+      setRefreshKey(Date.now());
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Wystąpił błąd podczas usuwania';
       addToast({
@@ -154,6 +153,7 @@ const UsersPage: React.FC = () => {
         bulkHandlers={bulkHandlers}
         rowKey={(row) => String(row.id || row.email)}
         initialPerPage={10}
+        refreshKey={refreshKey}
       />
 
       <AddUserDialog

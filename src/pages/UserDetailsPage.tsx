@@ -21,7 +21,7 @@ import {
 import EditUserDialog from '@/components/dialogs/EditUserDialog';
 import DeleteUserDialog from '@/components/dialogs/DeleteUserDialog';
 import type { EditUserFormValues } from '@/utils/formSchemas';
-import { deleteUser, type UserRecord } from '@/services/usersService';
+import { type UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
 
 // Extended user data matching our forms
@@ -235,18 +235,13 @@ const UserDetailsPage: React.FC = () => {
 
   const handleUserDeleted = useCallback(async () => {
     if (!userData) return;
-    try {
-      await deleteUser(String(userData.id));
-      addToast({
-        id: crypto.randomUUID(),
-        message: `Użytkownik ${userData.full_name} został usunięty`,
-        severity: 'success'
-      });
-      navigate('/app/users');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Wystąpił błąd podczas usuwania';
-      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
-    }
+
+    addToast({
+      id: crypto.randomUUID(),
+      message: `Użytkownik ${userData.full_name} został usunięty`,
+      severity: 'success'
+    });
+    navigate('/app/users');
   }, [userData, addToast, navigate]);
 
   // Convert to UserRecord for dialogs

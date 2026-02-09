@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Alert,
@@ -43,7 +43,8 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
   bulkActions,
   bulkHandlers,
   rowKey = 'id',
-  initialPerPage = 10
+  initialPerPage = 10,
+  refreshKey
 }: GenericListViewProps<T>) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -84,6 +85,11 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
     clearSelection,
     refetch
   } = controller;
+
+  useEffect(() => {
+    if (refreshKey === undefined) return;
+    refetch();
+  }, [refreshKey, refetch]);
 
   // Calculate selected count
   const selectedCount = selectedIds.size;

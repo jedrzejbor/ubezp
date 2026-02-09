@@ -9,10 +9,15 @@ import {
   Chip,
   Divider,
   Dialog,
-  DialogContent
+  DialogContent,
+  InputAdornment
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import type { UserRecord } from '@/services/usersService';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import { deleteUser, type UserRecord } from '@/services/usersService';
+import type { ApiError } from '@/services/apiClient';
+import { useUiStore } from '@/store/uiStore';
 
 interface DeleteUserDialogProps {
   open: boolean;
@@ -27,22 +32,50 @@ interface ExtendedUserData extends UserRecord {
 }
 
 const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user, onSuccess }) => {
+  const { addToast } = useUiStore();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<1 | 2>(1); // Step 1: show user data, Step 2: ask for password
 
   const extendedUser = user as ExtendedUserData;
 
   const handleDelete = async () => {
     setLoading(true);
+    setPasswordError(null);
     try {
-      // TODO: Call API to delete user with password confirmation
-      // await deleteUser(user?.id, password);
+      console.log('user przed usunięciem:', user);
+      if (!user?.id) {
+        throw new Error('Brak identyfikatora użytkownika');
+      }
+
+      await deleteUser(user.id, password);
 
       onSuccess?.();
       handleClose();
     } catch (error) {
-      console.error('Error deleting user:', error);
+      const apiError = error as ApiError;
+
+      if (apiError?.status === 400 && apiError.message === 'CANNOT_DELETE_SELF') {
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Nie możesz usunąć własnego konta',
+          severity: 'error'
+        });
+        return;
+      }
+
+      if (apiError?.status === 422) {
+        const fieldError = apiError.errors?.password?.[0];
+        if (fieldError) {
+          setPasswordError(fieldError);
+          return;
+        }
+      }
+
+      const message = apiError?.message || 'Wystąpił błąd podczas usuwania użytkownika';
+      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -50,6 +83,8 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
   const handleClose = () => {
     setPassword('');
+    setPasswordError(null);
+    setShowPassword(false);
     setStep(1);
     onClose();
   };
@@ -58,8 +93,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
     setStep(2);
   };
 
-  // Desktop version - show user details
-  const Step1Content = () => (
+  const step1Content = (
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
@@ -302,8 +336,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
     </Box>
   );
 
-  // Mobile version - show password field
-  const Step2Content = () => (
+  const step2Content = (
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Stack
@@ -350,11 +383,26 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
       {/* Password field */}
       <TextField
         label="Hasło"
-        type="password"
+        type={showPassword ? 'text' : 'password'}
+        autoComplete="current-password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (passwordError) setPasswordError(null);
+        }}
         fullWidth
         size="medium"
+        error={Boolean(passwordError)}
+        helperText={passwordError || ' '}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                {showPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
+              </IconButton>
+            </InputAdornment>
+          )
+        }}
         sx={{
           mb: 2,
           '& .MuiOutlinedInput-root': {
@@ -425,9 +473,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         }
       }}
     >
-      <DialogContent sx={{ p: 0 }}>
-        {step === 1 ? <Step1Content /> : <Step2Content />}
-      </DialogContent>
+      <DialogContent sx={{ p: 0 }}>{step === 1 ? step1Content : step2Content}</DialogContent>
     </Dialog>
   );
 };
