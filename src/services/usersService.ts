@@ -73,8 +73,10 @@ export const fetchUsersTable = async (
 /**
  * Delete user by ID
  */
-export const deleteUser = async (userId: string | number): Promise<void> => {
-  await apiClient.delete(`/api/users/${userId}`);
+export const deleteUser = async (userId: string | number, password: string): Promise<void> => {
+  await apiClient.delete(`/api/user/${userId}`, {
+    body: JSON.stringify({ password })
+  });
 };
 
 /**

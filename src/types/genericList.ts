@@ -125,6 +125,8 @@ export interface GenericListViewProps<T extends GenericRecord = GenericRecord> {
   rowKey?: keyof T | ((row: T) => string);
   /** Initial page size */
   initialPerPage?: number;
+  /** Change to trigger refetch */
+  refreshKey?: string | number;
 }
 
 // ================== CONTROLLER STATE ==================
