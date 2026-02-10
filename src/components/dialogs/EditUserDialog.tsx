@@ -28,6 +28,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { editUserSchema, type EditUserFormValues } from '@/utils/formSchemas';
 import { generateSecurePassword } from '@/utils/passwordGenerator';
 import type { UserRecord } from '@/services/usersService';
+import { getUserCreateOptions, updateUser } from '@/services/usersService';
+import type { ApiError } from '@/services/apiClient';
+import { useUiStore } from '@/store/uiStore';
 
 // Extended user type with additional form fields
 interface ExtendedUserData extends UserRecord {
@@ -49,32 +52,11 @@ export interface EditUserDialogProps {
   onSuccess?: (data: EditUserFormValues) => void;
 }
 
-// Mock data - replace with API calls
-const ROLES = [
-  { value: 'super_admin_csb', label: 'Super admin CSB' },
-  { value: 'admin_klient', label: 'Admin Klient' },
-  { value: 'klient_user', label: 'Klient User' }
-];
-
-const COMPANIES = [
-  { value: 'cliffside_brokers', label: 'Cliffside Brokers' },
-  { value: 'maspex', label: 'Maspex' },
-  { value: 'kubus', label: 'Kubuś' },
-  { value: 'lubella', label: 'Lubella' }
-];
-
 const POSITIONS = [
   { value: 'dyrektor', label: 'Dyrektor' },
   { value: 'kierownik', label: 'Kierownik' },
   { value: 'specjalista', label: 'Specjalista' },
   { value: 'asystent', label: 'Asystent' }
-];
-
-const COMPETENCIES = [
-  { value: 'pojazdy', label: 'pojazdy' },
-  { value: 'mienie', label: 'mienie' },
-  { value: 'oc', label: 'OC' },
-  { value: 'nnw', label: 'NNW' }
 ];
 
 const ACCOUNT_TYPES = [
@@ -102,7 +84,11 @@ const ENTITIES = [
 const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, onSuccess }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { addToast } = useUiStore();
 
+  const [roleOptions, setRoleOptions] = useState<string[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<string[]>([]);
+  const [competencyOptions, setCompetencyOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
 
@@ -112,6 +98,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
     control,
     watch,
     reset,
+    setError,
     formState: { errors }
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
@@ -134,6 +121,28 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
   });
 
   const hasRelations = watch('hasRelations');
+
+  useEffect(() => {
+    if (!open) return;
+
+    const loadOptions = async () => {
+      try {
+        const response = await getUserCreateOptions();
+        setRoleOptions(response.roles || []);
+        setCompanyOptions(response.companies || []);
+        setCompetencyOptions(response.scopes_of_competence || []);
+      } catch (error) {
+        const apiError = error as ApiError;
+        addToast({
+          id: crypto.randomUUID(),
+          message: apiError?.message || 'Nie udało się pobrać opcji formularza',
+          severity: 'error'
+        });
+      }
+    };
+
+    loadOptions();
+  }, [open, addToast]);
 
   // Pre-populate form with user data when user prop changes
   useEffect(() => {
@@ -169,19 +178,72 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
   const handleFormSubmit = async (data: EditUserFormValues) => {
     setLoading(true);
     try {
-      // Include generated password if exists
-      const submitData = {
-        ...data,
-        ...(generatedPassword && { newPassword: generatedPassword })
+      if (!user?.id) {
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Brak identyfikatora użytkownika',
+          severity: 'error'
+        });
+        setLoading(false);
+        return;
+      }
+
+      const status: 'active' | 'inactive' = data.status === 'aktywny' ? 'active' : 'inactive';
+
+      const payload = {
+        firstname: data.firstName,
+        lastname: data.lastName,
+        position: data.position || undefined,
+        phone: data.phone,
+        email: data.email,
+        role: data.role,
+        status,
+        scopes_of_competence: data.competencies?.length ? data.competencies : undefined,
+        company: data.company || undefined,
+        marketing_consent:
+          data.marketingConsent === 'tak' ? true : data.marketingConsent === 'nie' ? false : null,
+        ...(generatedPassword
+          ? { password: generatedPassword, password_confirmation: generatedPassword }
+          : {})
       };
 
-      // TODO: Call API to update user
-      // await updateUser(user?.id, submitData);
+      await updateUser(user.id, payload);
 
-      onSuccess?.(submitData as EditUserFormValues);
+      onSuccess?.(data as EditUserFormValues);
       handleClose();
     } catch (error) {
-      console.error('Error updating user:', error);
+      const apiError = error as ApiError;
+
+      if (apiError?.status === 422 && apiError.errors) {
+        const fieldMap: Partial<Record<string, keyof EditUserFormValues>> = {
+          firstname: 'firstName',
+          lastname: 'lastName',
+          scopes_of_competence: 'competencies',
+          marketing_consent: 'marketingConsent'
+        };
+
+        Object.entries(apiError.errors).forEach(([field, messages]) => {
+          const formField = fieldMap[field] || (field as keyof EditUserFormValues);
+          if (formField) {
+            setError(formField, {
+              type: 'server',
+              message: messages?.[0] || 'Nieprawidłowa wartość'
+            });
+          }
+        });
+
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Popraw błędy w formularzu',
+          severity: 'error'
+        });
+      } else {
+        addToast({
+          id: crypto.randomUUID(),
+          message: apiError?.message || 'Nie udało się zapisać zmian',
+          severity: 'error'
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -231,9 +293,9 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
                   }
                 }}
               >
-                {ROLES.map((role) => (
-                  <MenuItem key={role.value} value={role.value}>
-                    {role.label}
+                {roleOptions.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
                   </MenuItem>
                 ))}
               </Select>
@@ -256,9 +318,9 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
                   }
                 }}
               >
-                {COMPANIES.map((company) => (
-                  <MenuItem key={company.value} value={company.value}>
-                    {company.label}
+                {companyOptions.map((company) => (
+                  <MenuItem key={company} value={company}>
+                    {company}
                   </MenuItem>
                 ))}
               </Select>
@@ -398,11 +460,11 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
             render={({ field }) => (
               <Autocomplete
                 multiple
-                options={COMPETENCIES}
-                getOptionLabel={(option) => option.label}
-                value={COMPETENCIES.filter((c) => field.value?.includes(c.value))}
+                options={competencyOptions}
+                getOptionLabel={(option) => option}
+                value={competencyOptions.filter((c) => field.value?.includes(c))}
                 onChange={(_, newValue) => {
-                  field.onChange(newValue.map((v) => v.value));
+                  field.onChange(newValue);
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label="Zakres kompetencji" size="medium" />
@@ -410,10 +472,10 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip
-                      label={option.label}
+                      label={option}
                       size="small"
                       {...getTagProps({ index })}
-                      key={option.value}
+                      key={option}
                       sx={{
                         borderRadius: '16px',
                         border: '1px solid rgba(0, 0, 0, 0.5)',

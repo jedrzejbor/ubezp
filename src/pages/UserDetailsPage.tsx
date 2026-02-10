@@ -258,7 +258,28 @@ const UserDetailsPage: React.FC = () => {
         message: `Użytkownik ${data.email} został zaktualizowany`,
         severity: 'success'
       });
-      // TODO: Refresh user data after update
+      setUserData((previous) => {
+        if (!previous) return previous;
+
+        const fullName = `${data.firstName} ${data.lastName}`.trim();
+
+        return {
+          ...previous,
+          full_name: fullName || previous.full_name,
+          email: data.email,
+          phone: data.phone,
+          status: data.status,
+          role: data.role,
+          position: data.position,
+          competencies: data.competencies,
+          company: data.company,
+          account_type: data.accountType,
+          managingEntities: data.managingEntities,
+          dependentEntities: data.dependentEntities,
+          firstName: data.firstName,
+          lastName: data.lastName
+        };
+      });
     },
     [addToast]
   );
