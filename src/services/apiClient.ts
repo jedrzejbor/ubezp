@@ -33,6 +33,7 @@ class ApiClient {
       const token = useAuthStore.getState().token;
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        headers['X-Auth-Token'] = token;
       }
     }
 

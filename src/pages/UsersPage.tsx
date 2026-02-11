@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { GenericListView } from '@/components/lists';
-import { fetchUsersTable, deleteUser, UserRecord } from '@/services/usersService';
+import { fetchUsersTable, restoreUser, UserRecord } from '@/services/usersService';
 import { useUiStore } from '@/store/uiStore';
 import AddUserDialog from '@/components/dialogs/AddUserDialog';
 import EditUserDialog from '@/components/dialogs/EditUserDialog';
 import DeleteUserDialog from '@/components/dialogs/DeleteUserDialog';
+import ForceDeleteUserDialog from '@/components/dialogs/ForceDeleteUserDialog';
 import type { AddUserFormValues, EditUserFormValues } from '@/utils/formSchemas';
 
 const UsersPage: React.FC = () => {
@@ -16,7 +17,9 @@ const UsersPage: React.FC = () => {
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
+  const [forceDeleteDialogOpen, setForceDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
+  const [refreshKey, setRefreshKey] = useState<number | undefined>(undefined);
 
   // Row handlers - actions for each row
   const handleViewUser = useCallback(
@@ -40,6 +43,43 @@ const UsersPage: React.FC = () => {
     setDeleteUserDialogOpen(true);
   }, []);
 
+  const handleForceDeleteUser = useCallback((row: UserRecord) => {
+    setSelectedUser(row);
+    setForceDeleteDialogOpen(true);
+  }, []);
+
+  const handleRestoreUser = useCallback(
+    async (row: UserRecord) => {
+      if (!row.id) {
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Brak identyfikatora użytkownika',
+          severity: 'error'
+        });
+        return;
+      }
+
+      try {
+        await restoreUser(row.id);
+        addToast({
+          id: crypto.randomUUID(),
+          message: `Użytkownik ${row.full_name} został przywrócony`,
+          severity: 'success'
+        });
+        setRefreshKey(Date.now());
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Wystąpił błąd podczas przywracania';
+        addToast({
+          id: crypto.randomUUID(),
+          message,
+          severity: 'error'
+        });
+      }
+    },
+    [addToast]
+  );
+
   // General handlers - actions in toolbar
   const handleCreateUser = useCallback(() => {
     setAddUserDialogOpen(true);
@@ -51,10 +91,17 @@ const UsersPage: React.FC = () => {
   }, []);
 
   // Handle user created successfully
-  const handleUserCreated = useCallback((data: AddUserFormValues, generatedPassword: string) => {
-    // Optionally refresh the list or show additional feedback
-    console.log('User created:', data.email, 'Password:', generatedPassword);
-  }, []);
+  const handleUserCreated = useCallback(
+    (data: AddUserFormValues) => {
+      addToast({
+        id: crypto.randomUUID(),
+        message: `Użytkownik ${data.email} został utworzony`,
+        severity: 'success'
+      });
+      setRefreshKey(Date.now());
+    },
+    [addToast]
+  );
 
   // Handle dialog close
   const handleEditUserDialogClose = useCallback(() => {
@@ -70,6 +117,7 @@ const UsersPage: React.FC = () => {
         message: `Użytkownik ${data.email} został zaktualizowany`,
         severity: 'success'
       });
+      setRefreshKey(Date.now());
     },
     [addToast]
   );
@@ -80,21 +128,45 @@ const UsersPage: React.FC = () => {
     setSelectedUser(null);
   }, []);
 
+  const handleForceDeleteDialogClose = useCallback(() => {
+    setForceDeleteDialogOpen(false);
+    setSelectedUser(null);
+  }, []);
+
   // Handle user deleted successfully
   const handleUserDeleted = useCallback(async () => {
     if (!selectedUser) return;
 
     try {
-      const userId = selectedUser.id || selectedUser.email;
-      await deleteUser(userId as string);
-
       addToast({
         id: crypto.randomUUID(),
         message: `Użytkownik ${selectedUser.full_name} został usunięty`,
         severity: 'success'
       });
+      setRefreshKey(Date.now());
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Wystąpił błąd podczas usuwania';
+      addToast({
+        id: crypto.randomUUID(),
+        message,
+        severity: 'error'
+      });
+    }
+  }, [selectedUser, addToast]);
+
+  const handleUserForceDeleted = useCallback(async () => {
+    if (!selectedUser) return;
+
+    try {
+      addToast({
+        id: crypto.randomUUID(),
+        message: `Użytkownik ${selectedUser.full_name} został trwale usunięty`,
+        severity: 'success'
+      });
+      setRefreshKey(Date.now());
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Wystąpił błąd podczas trwałego usuwania';
       addToast({
         id: crypto.randomUUID(),
         message,
@@ -125,6 +197,8 @@ const UsersPage: React.FC = () => {
     'edit-user': handleEditUser,
     delete: handleDeleteUser,
     'delete-user': handleDeleteUser,
+    'restore-user': handleRestoreUser,
+    'force-delete-user': handleForceDeleteUser,
     // General actions (from backend generalActions[])
     'create-user': handleCreateUser
   };
@@ -154,6 +228,7 @@ const UsersPage: React.FC = () => {
         bulkHandlers={bulkHandlers}
         rowKey={(row) => String(row.id || row.email)}
         initialPerPage={10}
+        refreshKey={refreshKey}
       />
 
       <AddUserDialog
@@ -174,6 +249,13 @@ const UsersPage: React.FC = () => {
         onClose={handleDeleteUserDialogClose}
         user={selectedUser}
         onSuccess={handleUserDeleted}
+      />
+
+      <ForceDeleteUserDialog
+        open={forceDeleteDialogOpen}
+        onClose={handleForceDeleteDialogClose}
+        user={selectedUser}
+        onSuccess={handleUserForceDeleted}
       />
     </Box>
   );

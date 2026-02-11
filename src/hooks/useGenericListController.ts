@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   GenericRecord,
   Fetcher,
@@ -41,6 +41,8 @@ export function useGenericListController<T extends GenericRecord = GenericRecord
 
   // Filters
   const [filters, setFilters] = useState<FiltersState>({});
+
+  const hasAppliedInitialSort = useRef(false);
 
   // Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -98,10 +100,11 @@ export function useGenericListController<T extends GenericRecord = GenericRecord
       setMeta(response.meta);
 
       // Set initial sort from meta if available
-      if (response.meta.sortable.length > 0 && sortProperty === 'created_at') {
+      if (!hasAppliedInitialSort.current && response.meta.sortable.length > 0) {
         const defaultSort = response.meta.sortable[0];
         setSortProperty(defaultSort.property);
         setSortOrder(defaultSort.order);
+        hasAppliedInitialSort.current = true;
       }
     } catch (err) {
       const message =

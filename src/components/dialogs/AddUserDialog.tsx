@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -26,40 +26,21 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addUserSchema, type AddUserFormValues } from '@/utils/formSchemas';
-import { generateSecurePassword } from '@/utils/passwordGenerator';
+import { createUser, getUserCreateOptions } from '@/services/usersService';
+import type { ApiError } from '@/services/apiClient';
+import { useUiStore } from '@/store/uiStore';
 
 export interface AddUserDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess?: (data: AddUserFormValues, password: string) => void;
+  onSuccess?: (data: AddUserFormValues, password?: string) => void;
 }
-
-// Mock data - replace with API calls
-const ROLES = [
-  { value: 'super_admin_csb', label: 'Super admin CSB' },
-  { value: 'admin_klient', label: 'Admin Klient' },
-  { value: 'klient_user', label: 'Klient User' }
-];
-
-const COMPANIES = [
-  { value: 'cliffside_brokers', label: 'Cliffside Brokers' },
-  { value: 'maspex', label: 'Maspex' },
-  { value: 'kubus', label: 'Kubuś' },
-  { value: 'lubella', label: 'Lubella' }
-];
 
 const POSITIONS = [
   { value: 'dyrektor', label: 'Dyrektor' },
   { value: 'kierownik', label: 'Kierownik' },
   { value: 'specjalista', label: 'Specjalista' },
   { value: 'asystent', label: 'Asystent' }
-];
-
-const COMPETENCIES = [
-  { value: 'pojazdy', label: 'pojazdy' },
-  { value: 'mienie', label: 'mienie' },
-  { value: 'oc', label: 'OC' },
-  { value: 'nnw', label: 'NNW' }
 ];
 
 const ACCOUNT_TYPES = [
@@ -82,11 +63,15 @@ const ENTITIES = [
 const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { addToast } = useUiStore();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [createdEmail, setCreatedEmail] = useState('');
+  const [roleOptions, setRoleOptions] = useState<string[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<string[]>([]);
+  const [competencyOptions, setCompetencyOptions] = useState<string[]>([]);
 
   const {
     register,
@@ -94,6 +79,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
     control,
     watch,
     reset,
+    setError,
     formState: { errors }
   } = useForm<AddUserFormValues>({
     resolver: zodResolver(addUserSchema),
@@ -116,23 +102,85 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
 
   const hasRelations = watch('hasRelations');
 
-  // Generate password on component mount
-  const password = useMemo(() => generateSecurePassword(10), []);
+  useEffect(() => {
+    if (!open) return;
+
+    const loadOptions = async () => {
+      try {
+        const response = await getUserCreateOptions();
+        setRoleOptions(response.roles || []);
+        setCompanyOptions(response.companies || []);
+        setCompetencyOptions(response.scopes_of_competence || []);
+      } catch (error) {
+        const apiError = error as ApiError;
+        addToast({
+          id: crypto.randomUUID(),
+          message: apiError?.message || 'Nie udało się pobrać opcji formularza',
+          severity: 'error'
+        });
+      }
+    };
+
+    loadOptions();
+  }, [open, addToast]);
 
   const handleFormSubmit = async (data: AddUserFormValues) => {
     setLoading(true);
     try {
-      // TODO: Call API to create user
-      // await createUser({ ...data, password });
+      const status: 'active' | 'inactive' = data.status === 'aktywny' ? 'active' : 'inactive';
 
-      setGeneratedPassword(password);
-      setCreatedEmail(data.email);
+      const payload = {
+        firstname: data.firstName,
+        lastname: data.lastName,
+        position: data.position || undefined,
+        phone: data.phone,
+        email: data.email,
+        role: data.role,
+        status,
+        scopes_of_competence: data.competencies?.length ? data.competencies : undefined,
+        company: data.company || undefined
+      };
+
+      const response = await createUser(payload);
+
+      setGeneratedPassword(response.password || '');
+      setCreatedEmail(response.user?.email || data.email);
       setStep(2);
 
       // Callback for parent component
-      onSuccess?.(data, password);
+      onSuccess?.(data, response.password || '');
     } catch (error) {
-      console.error('Error creating user:', error);
+      const apiError = error as ApiError;
+
+      if (apiError?.status === 422 && apiError.errors) {
+        const fieldMap: Partial<Record<string, keyof AddUserFormValues>> = {
+          firstname: 'firstName',
+          lastname: 'lastName',
+          scopes_of_competence: 'competencies'
+        };
+
+        Object.entries(apiError.errors).forEach(([field, messages]) => {
+          const formField = fieldMap[field] || (field as keyof AddUserFormValues);
+          if (formField) {
+            setError(formField, {
+              type: 'server',
+              message: messages?.[0] || 'Nieprawidłowa wartość'
+            });
+          }
+        });
+
+        addToast({
+          id: crypto.randomUUID(),
+          message: 'Popraw błędy w formularzu',
+          severity: 'error'
+        });
+      } else {
+        addToast({
+          id: crypto.randomUUID(),
+          message: apiError?.message || 'Nie udało się utworzyć użytkownika',
+          severity: 'error'
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -240,9 +288,9 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
                   }
                 }}
               >
-                {ROLES.map((role) => (
-                  <MenuItem key={role.value} value={role.value}>
-                    {role.label}
+                {roleOptions.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
                   </MenuItem>
                 ))}
               </Select>
@@ -265,9 +313,9 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
                   }
                 }}
               >
-                {COMPANIES.map((company) => (
-                  <MenuItem key={company.value} value={company.value}>
-                    {company.label}
+                {companyOptions.map((company) => (
+                  <MenuItem key={company} value={company}>
+                    {company}
                   </MenuItem>
                 ))}
               </Select>
@@ -339,11 +387,16 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
           render={({ field }) => (
             <Autocomplete
               multiple
-              options={COMPETENCIES}
-              getOptionLabel={(option) => option.label}
-              value={COMPETENCIES.filter((c) => field.value?.includes(c.value))}
+              options={competencyOptions}
+              getOptionLabel={(option) => option}
+              value={competencyOptions.filter((c) => field.value?.includes(c))}
               onChange={(_, newValue) => {
-                field.onChange(newValue.map((v) => v.value));
+                field.onChange(newValue);
+              }}
+              slotProps={{
+                paper: {
+                  sx: { bgcolor: 'white' }
+                }
               }}
               renderInput={(params) => (
                 <TextField {...params} label="Zakres kompetencji" size="medium" />
@@ -351,10 +404,10 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip
-                    label={option.label}
+                    label={option}
                     size="small"
                     {...getTagProps({ index })}
-                    key={option.value}
+                    key={option}
                     sx={{
                       borderRadius: '16px',
                       border: '1px solid rgba(0, 0, 0, 0.5)',

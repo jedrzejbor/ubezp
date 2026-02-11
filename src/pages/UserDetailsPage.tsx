@@ -21,7 +21,8 @@ import {
 import EditUserDialog from '@/components/dialogs/EditUserDialog';
 import DeleteUserDialog from '@/components/dialogs/DeleteUserDialog';
 import type { EditUserFormValues } from '@/utils/formSchemas';
-import { deleteUser, type UserRecord } from '@/services/usersService';
+import { type UserRecord, getUserDetails, type UserDetailsApiUser } from '@/services/usersService';
+import type { ApiError } from '@/services/apiClient';
 import { useUiStore } from '@/store/uiStore';
 
 // Extended user data matching our forms
@@ -134,65 +135,102 @@ const UserDetailsPage: React.FC = () => {
   const [personalSectionOpen, setPersonalSectionOpen] = useState(true);
   const [relationsSectionOpen, setRelationsSectionOpen] = useState(true);
 
-  // Fetch user data — use router state if available, otherwise fetch from API
+  const mapFromStateUser = (stateUser: UserRecord): UserDetailsData => {
+    const nameParts = stateUser.full_name?.split(' ') || [];
+
+    return {
+      id: stateUser.id || userId || '',
+      full_name: stateUser.full_name,
+      company: stateUser.company,
+      email: stateUser.email,
+      phone: stateUser.phone,
+      account_type: stateUser.account_type,
+      status: stateUser.status,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      role: ((stateUser as Record<string, unknown>).role as string) || 'Klient user',
+      position: ((stateUser as Record<string, unknown>).position as string) || '',
+      competencies: ((stateUser as Record<string, unknown>).competencies as string[]) || [],
+      managingEntities: ((stateUser as Record<string, unknown>).managingEntities as string[]) || [],
+      dependentEntities:
+        ((stateUser as Record<string, unknown>).dependentEntities as string[]) || []
+    };
+  };
+
+  const mapFromApiUser = (apiUser: UserDetailsApiUser, stateUser?: UserRecord): UserDetailsData => {
+    const fullName = [apiUser.firstname, apiUser.lastname].filter(Boolean).join(' ').trim();
+    const fallbackName = stateUser?.full_name || '-';
+    const nameParts = fullName ? fullName.split(' ') : fallbackName.split(' ');
+
+    return {
+      id: apiUser.id ?? stateUser?.id ?? userId ?? '',
+      full_name: fullName || fallbackName,
+      company: stateUser?.company || '-',
+      email: apiUser.email || stateUser?.email || '-',
+      phone: apiUser.phone || stateUser?.phone || '-',
+      account_type: stateUser?.account_type || '-',
+      status: stateUser?.status || 'aktywny',
+      firstName: apiUser.firstname || nameParts[0] || '',
+      lastName: apiUser.lastname || nameParts.slice(1).join(' ') || '',
+      role: ((stateUser as Record<string, unknown>)?.role as string) || 'Klient user',
+      position:
+        apiUser.position || ((stateUser as Record<string, unknown>)?.position as string) || '',
+      competencies: ((stateUser as Record<string, unknown>)?.competencies as string[]) || [],
+      managingEntities:
+        ((stateUser as Record<string, unknown>)?.managingEntities as string[]) || [],
+      dependentEntities:
+        ((stateUser as Record<string, unknown>)?.dependentEntities as string[]) || []
+    };
+  };
+
+  // Fetch user data — use router state for instant render, then refresh from API
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
+      const stateUser = (location.state as { user?: UserRecord })?.user;
+
       try {
-        // Try to use user data passed via navigation state
-        const stateUser = (location.state as { user?: UserRecord })?.user;
-
         if (stateUser) {
-          // Map UserRecord from list to our details structure
-          const nameParts = stateUser.full_name?.split(' ') || [];
-          setUserData({
-            id: stateUser.id || userId || '',
-            full_name: stateUser.full_name,
-            company: stateUser.company,
-            email: stateUser.email,
-            phone: stateUser.phone,
-            account_type: stateUser.account_type,
-            status: stateUser.status,
-            firstName: nameParts[0] || '',
-            lastName: nameParts.slice(1).join(' ') || '',
-            role: ((stateUser as Record<string, unknown>).role as string) || 'Klient user',
-            position: ((stateUser as Record<string, unknown>).position as string) || '',
-            competencies: ((stateUser as Record<string, unknown>).competencies as string[]) || [],
-            managingEntities:
-              ((stateUser as Record<string, unknown>).managingEntities as string[]) || [],
-            dependentEntities:
-              ((stateUser as Record<string, unknown>).dependentEntities as string[]) || []
-          });
-        } else {
-          // TODO: Replace with actual API call when endpoint is ready
-          // const data = await getUserDetails(userId);
-          // setUserData(data);
+          setUserData(mapFromStateUser(stateUser));
+        }
 
-          // Fallback mock data for direct URL access
-          setUserData({
-            id: userId || '1',
-            full_name: 'Użytkownik',
-            company: '-',
-            email: '-',
-            phone: '-',
-            account_type: '-',
-            status: 'aktywny',
-            firstName: '',
-            lastName: '',
-            role: '-',
-            position: '-',
-            competencies: [],
-            managingEntities: [],
-            dependentEntities: []
+        if (!userId) {
+          if (!stateUser) setUserData(null);
+          return;
+        }
+
+        const response = await getUserDetails(userId);
+        setUserData(mapFromApiUser(response.user, stateUser));
+      } catch (error) {
+        const apiError = error as ApiError;
+
+        if (apiError?.status === 401) {
+          addToast({
+            id: crypto.randomUUID(),
+            message: 'Sesja wygasła. Zaloguj się ponownie.',
+            severity: 'error'
+          });
+        } else if (apiError?.status === 404) {
+          addToast({
+            id: crypto.randomUUID(),
+            message: 'Nie znaleziono użytkownika',
+            severity: 'error'
+          });
+          setUserData(null);
+        } else if (apiError?.status === 403) {
+          addToast({
+            id: crypto.randomUUID(),
+            message: 'Brak uprawnień do podglądu użytkownika',
+            severity: 'error'
+          });
+          setUserData(null);
+        } else {
+          addToast({
+            id: crypto.randomUUID(),
+            message: 'Nie udało się pobrać danych użytkownika',
+            severity: 'error'
           });
         }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        addToast({
-          id: crypto.randomUUID(),
-          message: 'Nie udało się pobrać danych użytkownika',
-          severity: 'error'
-        });
       } finally {
         setLoading(false);
       }
@@ -220,7 +258,28 @@ const UserDetailsPage: React.FC = () => {
         message: `Użytkownik ${data.email} został zaktualizowany`,
         severity: 'success'
       });
-      // TODO: Refresh user data after update
+      setUserData((previous) => {
+        if (!previous) return previous;
+
+        const fullName = `${data.firstName} ${data.lastName}`.trim();
+
+        return {
+          ...previous,
+          full_name: fullName || previous.full_name,
+          email: data.email,
+          phone: data.phone,
+          status: data.status,
+          role: data.role,
+          position: data.position,
+          competencies: data.competencies,
+          company: data.company,
+          account_type: data.accountType,
+          managingEntities: data.managingEntities,
+          dependentEntities: data.dependentEntities,
+          firstName: data.firstName,
+          lastName: data.lastName
+        };
+      });
     },
     [addToast]
   );
@@ -235,18 +294,13 @@ const UserDetailsPage: React.FC = () => {
 
   const handleUserDeleted = useCallback(async () => {
     if (!userData) return;
-    try {
-      await deleteUser(String(userData.id));
-      addToast({
-        id: crypto.randomUUID(),
-        message: `Użytkownik ${userData.full_name} został usunięty`,
-        severity: 'success'
-      });
-      navigate('/app/users');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Wystąpił błąd podczas usuwania';
-      addToast({ id: crypto.randomUUID(), message, severity: 'error' });
-    }
+
+    addToast({
+      id: crypto.randomUUID(),
+      message: `Użytkownik ${userData.full_name} został usunięty`,
+      severity: 'success'
+    });
+    navigate('/app/users');
   }, [userData, addToast, navigate]);
 
   // Convert to UserRecord for dialogs
@@ -568,7 +622,7 @@ const UserDetailsPage: React.FC = () => {
       spacing={3}
       sx={{
         bgcolor: 'white',
-        borderRadius: 4,
+        borderRadius: 1,
         py: 3,
         px: 3,
         height: '100%'

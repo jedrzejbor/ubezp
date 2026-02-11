@@ -34,7 +34,7 @@ const getStatusChipStyles = (status: string) => {
   if (
     lowerStatus.includes('nieaktywny') ||
     lowerStatus.includes('inactive') ||
-    lowerStatus.includes('nie aktywny')
+    lowerStatus.includes('nieaktywny')
   ) {
     return {
       bgcolor: '#FEF3F2',

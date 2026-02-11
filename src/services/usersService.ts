@@ -15,6 +15,67 @@ export interface UserRecord extends GenericRecord {
   status: string;
 }
 
+export interface UserDetailsApiUser {
+  id: string | number;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  created_at?: string;
+  password_last_change_at?: string;
+}
+
+export interface UserDetailsResponse {
+  user: UserDetailsApiUser;
+  actions?: { type: string; label: string; handler: string }[];
+}
+
+export interface CreateUserPayload {
+  firstname: string;
+  lastname: string;
+  position?: string;
+  phone: string;
+  email: string;
+  password?: string;
+  role: string;
+  status: 'active' | 'inactive';
+  scopes_of_competence?: string[];
+  company?: string;
+  marketing_consent?: boolean;
+}
+
+export interface UpdateUserPayload {
+  firstname?: string | null;
+  lastname?: string | null;
+  position?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  password?: string;
+  password_confirmation?: string;
+  role?: string | null;
+  status?: 'active' | 'inactive' | null;
+  scopes_of_competence?: string[] | null;
+  company?: string | null;
+  marketing_consent?: boolean | null;
+}
+
+export interface CreateUserResponse {
+  user: UserDetailsApiUser;
+  password?: string;
+}
+
+export interface UpdateUserResponse {
+  user: UserDetailsApiUser;
+}
+
+export interface UserCreateOptionsResponse {
+  roles: string[];
+  companies: string[];
+  scopes_of_competence: string[];
+  statuses?: string[];
+}
+
 /**
  * Build query string from FetcherParams
  */
@@ -65,16 +126,65 @@ export const fetchUsersTable = async (
   const endpoint = `${API_ENDPOINTS.USERS_TABLE}?${queryString}`;
   // Helpful for debugging: log full endpoint when devtools are enabled
 
-  if (process.env.NODE_ENV !== 'production') console.debug('[usersService] GET', endpoint);
+  if (!import.meta.env.PROD) console.debug('[usersService] GET', endpoint);
 
   return apiClient.get<GenericListResponse<UserRecord>>(endpoint);
 };
 
 /**
+ * Create user
+ */
+export const createUser = async (payload: CreateUserPayload): Promise<CreateUserResponse> => {
+  return apiClient.post<CreateUserResponse>('/api/user', payload);
+};
+
+/**
+ * Update user
+ */
+export const updateUser = async (
+  userId: string | number,
+  payload: UpdateUserPayload
+): Promise<UpdateUserResponse> => {
+  return apiClient.post<UpdateUserResponse>(`/api/user/${userId}`, payload);
+};
+
+/**
+ * Fetch available options for create/edit user
+ */
+export const getUserCreateOptions = async (): Promise<UserCreateOptionsResponse> => {
+  return apiClient.get<UserCreateOptionsResponse>('/api/user/create');
+};
+
+/**
  * Delete user by ID
  */
-export const deleteUser = async (userId: string | number): Promise<void> => {
-  await apiClient.delete(`/api/users/${userId}`);
+export const deleteUser = async (userId: string | number, password: string): Promise<void> => {
+  await apiClient.delete(`/api/user/${userId}`, {
+    body: JSON.stringify({ password })
+  });
+};
+
+/**
+ * Force delete user by ID
+ */
+export const forceDeleteUser = async (userId: string | number, password: string): Promise<void> => {
+  await apiClient.delete(`/api/user/${userId}/force-delete`, {
+    body: JSON.stringify({ password })
+  });
+};
+
+/**
+ * Restore soft-deleted user by ID
+ */
+export const restoreUser = async (userId: string | number): Promise<void> => {
+  await apiClient.post(`/api/user/${userId}/restore`);
+};
+
+/**
+ * Fetch single user details
+ */
+export const getUserDetails = async (userId: string | number): Promise<UserDetailsResponse> => {
+  return apiClient.get<UserDetailsResponse>(`/api/user/${userId}`);
 };
 
 /**

@@ -15,11 +15,11 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import { deleteUser, type UserRecord } from '@/services/usersService';
+import { forceDeleteUser, type UserRecord } from '@/services/usersService';
 import type { ApiError } from '@/services/apiClient';
 import { useUiStore } from '@/store/uiStore';
 
-interface DeleteUserDialogProps {
+interface ForceDeleteUserDialogProps {
   open: boolean;
   onClose: () => void;
   user: UserRecord | null;
@@ -31,26 +31,31 @@ interface ExtendedUserData extends UserRecord {
   lastName?: string;
 }
 
-const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user, onSuccess }) => {
+const ForceDeleteUserDialog: React.FC<ForceDeleteUserDialogProps> = ({
+  open,
+  onClose,
+  user,
+  onSuccess
+}) => {
   const { addToast } = useUiStore();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1); // Step 1: show user data, Step 2: ask for password
+  const [step, setStep] = useState<1 | 2>(1);
 
   const extendedUser = user as ExtendedUserData;
 
-  const handleDelete = async () => {
+  const handleForceDelete = async () => {
     setLoading(true);
     setPasswordError(null);
+
     try {
-      console.log('user przed usunięciem:', user);
       if (!user?.id) {
         throw new Error('Brak identyfikatora użytkownika');
       }
 
-      await deleteUser(user.id, password);
+      await forceDeleteUser(user.id, password);
 
       onSuccess?.();
       handleClose();
@@ -74,7 +79,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         }
       }
 
-      const message = apiError?.message || 'Wystąpił błąd podczas usuwania użytkownika';
+      const message = apiError?.message || 'Wystąpił błąd podczas trwałego usuwania użytkownika';
       addToast({ id: crypto.randomUUID(), message, severity: 'error' });
     } finally {
       setLoading(false);
@@ -95,7 +100,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
   const step1Content = (
     <Box sx={{ p: 3 }}>
-      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
         <Typography
           sx={{
@@ -106,7 +110,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
             lineHeight: 1.6
           }}
         >
-          Czy na pewno chcesz usunąć <br />
+          Czy na pewno chcesz trwale usunąć <br />
           użytkownika?
         </Typography>
         <IconButton
@@ -120,7 +124,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         </IconButton>
       </Stack>
 
-      {/* Warning text */}
       <Typography
         sx={{
           fontSize: '14px',
@@ -130,11 +133,10 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
           mb: 3
         }}
       >
-        Pamiętaj usuwając klienta Centrala, usuniesz również powiązane z nim Jednostki. Przed
-        usunięciem upewni się czy nie utracisz innych danych.
+        Ta operacja usunie użytkownika bez możliwości przywrócenia. Przed usunięciem upewnij się, że
+        nie utracisz innych danych.
       </Typography>
 
-      {/* User details card */}
       <Box
         sx={{
           border: '1px solid rgba(143, 109, 95, 0.12)',
@@ -144,7 +146,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         }}
       >
         <Stack spacing={0}>
-          {/* Nazwa klienta */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -163,7 +164,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
           <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
 
-          {/* Imię i nazwisko */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -182,7 +182,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
           <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
 
-          {/* Email */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -199,7 +198,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
           <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
 
-          {/* Telefon */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -218,7 +216,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
           <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
 
-          {/* Rodzaj klienta */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -246,7 +243,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
           <Divider sx={{ borderColor: 'rgba(143, 109, 95, 0.08)' }} />
 
-          {/* Status */}
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -290,7 +286,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         </Stack>
       </Box>
 
-      {/* CTA Buttons */}
       <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
         <Button
           variant="outlined"
@@ -330,7 +325,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
             }
           }}
         >
-          Usuń klienta
+          Usuń trwale
         </Button>
       </Stack>
     </Box>
@@ -338,7 +333,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
 
   const step2Content = (
     <Box sx={{ p: 3 }}>
-      {/* Header */}
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -354,7 +348,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
             lineHeight: 1.6
           }}
         >
-          Potwierdź uśnięcie użytkownika
+          Potwierdź trwałe usunięcie
         </Typography>
         <IconButton
           onClick={handleClose}
@@ -367,7 +361,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         </IconButton>
       </Stack>
 
-      {/* Warning text */}
       <Typography
         sx={{
           fontSize: '14px',
@@ -377,10 +370,9 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
           mb: 3
         }}
       >
-        Podaj hasło używane do logowania do systemu, aby usunąć ubezpieczyciela
+        Podaj hasło używane do logowania do systemu, aby trwale usunąć użytkownika.
       </Typography>
 
-      {/* Password field */}
       <TextField
         label="Hasło"
         type={showPassword ? 'text' : 'password'}
@@ -411,7 +403,6 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         }}
       />
 
-      {/* CTA Buttons */}
       <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
         <Button
           variant="outlined"
@@ -436,7 +427,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
         </Button>
         <Button
           variant="contained"
-          onClick={handleDelete}
+          onClick={handleForceDelete}
           disabled={loading || !password.trim()}
           sx={{
             bgcolor: '#1E1F21',
@@ -452,13 +443,12 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
             }
           }}
         >
-          Usuń użytkownika
+          Usuń trwale
         </Button>
       </Stack>
     </Box>
   );
 
-  // Render appropriate version based on screen size
   return (
     <Dialog
       open={open}
@@ -478,4 +468,4 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({ open, onClose, user
   );
 };
 
-export default DeleteUserDialog;
+export default ForceDeleteUserDialog;
