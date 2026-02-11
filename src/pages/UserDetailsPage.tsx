@@ -622,7 +622,7 @@ const UserDetailsPage: React.FC = () => {
       spacing={3}
       sx={{
         bgcolor: 'white',
-        borderRadius: 4,
+        borderRadius: 1,
         py: 3,
         px: 3,
         height: '100%'
