@@ -62,7 +62,7 @@ const getStatusColor = (status: string): 'success' | 'error' | 'warning' | 'info
   if (
     lowerStatus.includes('nieaktywny') ||
     lowerStatus.includes('inactive') ||
-    lowerStatus.includes('nie aktywny')
+    lowerStatus.includes('nieaktywny')
   )
     return 'error';
   if (lowerStatus.includes('pending') || lowerStatus.includes('oczekuje')) return 'warning';

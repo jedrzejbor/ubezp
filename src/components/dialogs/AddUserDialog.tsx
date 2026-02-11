@@ -393,6 +393,11 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
               onChange={(_, newValue) => {
                 field.onChange(newValue);
               }}
+              slotProps={{
+                paper: {
+                  sx: { bgcolor: 'white' }
+                }
+              }}
               renderInput={(params) => (
                 <TextField {...params} label="Zakres kompetencji" size="medium" />
               )}

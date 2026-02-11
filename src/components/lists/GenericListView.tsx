@@ -86,6 +86,20 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
     refetch
   } = controller;
 
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  useEffect(() => {
+    const debounceId = window.setTimeout(() => {
+      setSearch(searchInput);
+    }, 500);
+
+    return () => window.clearTimeout(debounceId);
+  }, [searchInput, setSearch]);
+
   useEffect(() => {
     if (refreshKey === undefined) return;
     refetch();
@@ -260,8 +274,8 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
               {/* Search */}
               <TextField
                 placeholder="Szukaj"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 size="small"
                 sx={{
                   width: 300,
@@ -686,8 +700,8 @@ export const GenericListView = <T extends GenericRecord = GenericRecord>({
 
             {meta && (
               <ListToolbar
-                search={search}
-                onSearchChange={setSearch}
+                search={searchInput}
+                onSearchChange={setSearchInput}
                 sortable={meta.sortable}
                 sortProperty={sortProperty}
                 sortOrder={sortOrder}

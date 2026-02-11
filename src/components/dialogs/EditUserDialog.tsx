@@ -466,6 +466,11 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
                 onChange={(_, newValue) => {
                   field.onChange(newValue);
                 }}
+                slotProps={{
+                  paper: {
+                    sx: { bgcolor: 'white' }
+                  }
+                }}
                 renderInput={(params) => (
                   <TextField {...params} label="Zakres kompetencji" size="medium" />
                 )}
