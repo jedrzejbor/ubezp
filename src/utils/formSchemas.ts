@@ -82,7 +82,10 @@ export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 // Add User form schema
 export const addUserSchema = z.object({
   // Dane użytkownika
-  role: z.string().min(1, 'Wybierz rolę w systemie'),
+  role: z.preprocess(
+    (value) => (value === '' || value === null ? undefined : Number(value)),
+    z.number().int().min(1, 'Wybierz rolę w systemie')
+  ),
   company: z.string().min(1, 'Wybierz firmę'),
 
   // Dane użytkownika
@@ -107,12 +110,15 @@ export const addUserSchema = z.object({
   dependentEntities: z.array(z.string()).optional()
 });
 
-export type AddUserFormValues = z.infer<typeof addUserSchema>;
+export type AddUserFormValues = z.input<typeof addUserSchema>;
 
 // Edit User form schema (similar to addUser but with optional new password)
 export const editUserSchema = z.object({
   // Dane użytkownika
-  role: z.string().min(1, 'Wybierz rolę w systemie'),
+  role: z.preprocess(
+    (value) => (value === '' || value === null ? undefined : Number(value)),
+    z.number().int().min(1, 'Wybierz rolę w systemie')
+  ),
   company: z.string().min(1, 'Wybierz firmę'),
 
   // Dane użytkownika
@@ -138,4 +144,4 @@ export const editUserSchema = z.object({
   dependentEntities: z.array(z.string()).optional()
 });
 
-export type EditUserFormValues = z.infer<typeof editUserSchema>;
+export type EditUserFormValues = z.input<typeof editUserSchema>;
