@@ -28,13 +28,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { editUserSchema, type EditUserFormValues } from '@/utils/formSchemas';
 import { generateSecurePassword } from '@/utils/passwordGenerator';
 import type { UserRecord } from '@/services/usersService';
-import { getUserCreateOptions, updateUser } from '@/services/usersService';
+import { getUserCreateOptions, updateUser, type RoleOption } from '@/services/usersService';
 import type { ApiError } from '@/services/apiClient';
 import { useUiStore } from '@/store/uiStore';
 
 // Extended user type with additional form fields
 interface ExtendedUserData extends UserRecord {
-  role?: string;
+  role?: string | number;
   firstName?: string;
   lastName?: string;
   position?: string;
@@ -86,7 +86,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { addToast } = useUiStore();
 
-  const [roleOptions, setRoleOptions] = useState<string[]>([]);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
   const [companyOptions, setCompanyOptions] = useState<string[]>([]);
   const [competencyOptions, setCompetencyOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -150,7 +150,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
       const extendedUser = user as ExtendedUserData;
       // Map user data to form fields
       reset({
-        role: extendedUser.role || '',
+        role: extendedUser.role ?? '',
         company: user.company || '',
         firstName: extendedUser.firstName || user.full_name?.split(' ')[0] || '',
         lastName: extendedUser.lastName || user.full_name?.split(' ').slice(1).join(' ') || '',
@@ -196,7 +196,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
         position: data.position || undefined,
         phone: data.phone,
         email: data.email,
-        role: data.role,
+        role: Number(data.role),
         status,
         scopes_of_competence: data.competencies?.length ? data.competencies : undefined,
         company: data.company || undefined,
@@ -256,7 +256,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
   };
 
   // Form content
-  const FormContent = () => (
+  const renderFormContent = () => (
     <Box
       component="form"
       onSubmit={handleSubmit(handleFormSubmit)}
@@ -294,8 +294,8 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
                 }}
               >
                 {roleOptions.map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {role}
+                  <MenuItem key={role.value} value={role.value}>
+                    {role.label}
                   </MenuItem>
                 ))}
               </Select>
@@ -780,9 +780,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
           </Stack>
 
           {/* Content */}
-          <Box sx={{ px: 2 }}>
-            <FormContent />
-          </Box>
+          <Box sx={{ px: 2 }}>{renderFormContent()}</Box>
         </Box>
       </Drawer>
     );
@@ -825,7 +823,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ open, onClose, user, on
         </Stack>
 
         {/* Content */}
-        <FormContent />
+        {renderFormContent()}
       </DialogContent>
     </Dialog>
   );

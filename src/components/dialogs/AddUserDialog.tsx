@@ -26,7 +26,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addUserSchema, type AddUserFormValues } from '@/utils/formSchemas';
-import { createUser, getUserCreateOptions } from '@/services/usersService';
+import { createUser, getUserCreateOptions, type RoleOption } from '@/services/usersService';
 import type { ApiError } from '@/services/apiClient';
 import { useUiStore } from '@/store/uiStore';
 
@@ -69,7 +69,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
   const [loading, setLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [createdEmail, setCreatedEmail] = useState('');
-  const [roleOptions, setRoleOptions] = useState<string[]>([]);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
   const [companyOptions, setCompanyOptions] = useState<string[]>([]);
   const [competencyOptions, setCompetencyOptions] = useState<string[]>([]);
 
@@ -135,7 +135,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
         position: data.position || undefined,
         phone: data.phone,
         email: data.email,
-        role: data.role,
+        role: Number(data.role),
         status,
         scopes_of_competence: data.competencies?.length ? data.competencies : undefined,
         company: data.company || undefined
@@ -143,12 +143,13 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
 
       const response = await createUser(payload);
 
-      setGeneratedPassword(response.password || '');
+      const password = response.generated_password ?? response.password ?? '';
+      setGeneratedPassword(password);
       setCreatedEmail(response.user?.email || data.email);
       setStep(2);
 
       // Callback for parent component
-      onSuccess?.(data, response.password || '');
+      onSuccess?.(data, password);
     } catch (error) {
       const apiError = error as ApiError;
 
@@ -206,8 +207,8 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
     onClose();
   };
 
-  // Progress bar component
-  const ProgressBar = () => (
+  // Progress bar
+  const renderProgressBar = () => (
     <Box sx={{ px: 1, mb: 2 }}>
       <Stack direction="row" gap={0.5} sx={{ py: 1 }}>
         <Box
@@ -251,7 +252,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
   );
 
   // Step 1: Form fields
-  const Step1Content = () => (
+  const renderStep1Content = () => (
     <Box
       component="form"
       onSubmit={handleSubmit(handleFormSubmit)}
@@ -289,8 +290,8 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
                 }}
               >
                 {roleOptions.map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {role}
+                  <MenuItem key={role.value} value={role.value}>
+                    {role.label}
                   </MenuItem>
                 ))}
               </Select>
@@ -642,7 +643,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
   );
 
   // Step 2: Success / Credentials display
-  const Step2Content = () => (
+  const renderStep2Content = () => (
     <Box>
       <Typography
         sx={{
@@ -744,8 +745,8 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onClose, onSuccess 
   // Dialog content
   const content = (
     <Box sx={{ pb: 3 }}>
-      <ProgressBar />
-      {step === 1 ? <Step1Content /> : <Step2Content />}
+      {renderProgressBar()}
+      {step === 1 ? renderStep1Content() : renderStep2Content()}
     </Box>
   );
 
