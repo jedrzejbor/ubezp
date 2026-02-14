@@ -19,6 +19,8 @@ export interface ApiUser {
   firstname: string;
   lastname: string;
   position: string;
+  email?: string;
+  password_last_change_at?: string;
   phone?: string;
   created_at: string;
 }
@@ -76,6 +78,8 @@ export interface UpdateMeResponse {
   user?: Partial<ApiUser> & { email?: string; phone?: string };
 }
 
+export type GetMeResponse = ApiUser | { user: ApiUser };
+
 export interface RequestPasswordResetPayload {
   email: string;
 }
@@ -106,8 +110,16 @@ const mapApiUserToAuthUser = (apiUser: ApiUser, email: string): AuthUser => ({
   lastname: apiUser.lastname,
   position: apiUser.position,
   phone: apiUser.phone,
-  createdAt: apiUser.created_at
+  createdAt: apiUser.created_at,
+  passwordLastChange: apiUser.password_last_change_at ?? null
 });
+
+const extractMeUser = (response: GetMeResponse): ApiUser => {
+  if ('user' in response) {
+    return response.user;
+  }
+  return response;
+};
 
 // ============================================
 // Funkcje API - Autentykacja
@@ -191,6 +203,21 @@ export const updateMe = async (payload: UpdateMePayload): Promise<UpdateMeRespon
   } catch (error) {
     const apiError = error as ApiError;
     throw new Error(apiError.message || 'Błąd podczas aktualizacji danych użytkownika.');
+  }
+};
+
+/**
+ * Pobiera dane zalogowanego użytkownika (GET /api/me)
+ */
+export const getMe = async (): Promise<AuthUser> => {
+  try {
+    const response = await apiClient.get<GetMeResponse>(API_ENDPOINTS.ME);
+    const apiUser = extractMeUser(response);
+    const email = apiUser.email ?? '';
+    return mapApiUserToAuthUser(apiUser, email);
+  } catch (error) {
+    const apiError = error as ApiError;
+    throw new Error(apiError.message || 'Nie udało się pobrać danych użytkownika.');
   }
 };
 
